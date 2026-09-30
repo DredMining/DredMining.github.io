@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Тур ₽">
+<meta name="theme-color" content="#0E1A2B">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}input{font-size:16px!important}</style>
+<title>Калькулятор тура ГГНТУ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Rubik:wght@400;500;600&display=swap">
+<style>
+/* Layout: cost groups on the left, sticky result panel on the right; stacks on phones */
+:root{
+  --bg:#F4F5F7; --panel:#FFFFFF; --fg:#0E1A2B; --muted:#5B6878; --line:#DCE1E8;
+  --accent:#E0B400; --accent-ink:#0E1A2B; --hero:#0E1A2B; --hero-fg:#F7F5EF; --hero-muted:#B9C3D1;
+  --good:#1E8A4C; --bad:#C8102E; --soft:rgba(14,26,43,.06);
+  --display:'Oswald','Arial Narrow',Arial,sans-serif; --body:'Rubik',Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0A1220; --panel:#132338; --fg:#F7F5EF; --muted:#9FB0C4; --line:#2A3B52;
+  --accent:#FFE14D; --accent-ink:#0E1A2B; --hero:#1A2D47; --hero-fg:#F7F5EF; --hero-muted:#B9C3D1;
+  --good:#4CC57F; --bad:#FF7A85; --soft:rgba(255,255,255,.06); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0A1220; --panel:#132338; --fg:#F7F5EF; --muted:#9FB0C4; --line:#2A3B52;
+  --accent:#FFE14D; --accent-ink:#0E1A2B; --hero:#1A2D47; --hero-fg:#F7F5EF; --hero-muted:#B9C3D1;
+  --good:#4CC57F; --bad:#FF7A85; --soft:rgba(255,255,255,.06); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;padding-inline:16px;padding-block:20px 40px}
+.wrap{max-width:1140px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,4vw,36px);text-transform:uppercase;letter-spacing:.5px;margin:0;text-wrap:balance}
+header p{margin:4px 0 0;color:var(--muted)}
+.presets{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;background:var(--panel);overflow:hidden}
+.chip button{font:500 14px var(--body);padding:8px 14px;border:0;background:transparent;color:var(--fg);cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent)}
+.chip.on button{color:var(--accent-ink)}
+.chip .x{padding:8px 10px 8px 2px;color:var(--muted)}
+.addcity{margin-left:auto;display:flex;gap:8px;align-items:center}
+.plus{font:600 18px var(--body);width:38px;height:38px;border-radius:999px;border:1px dashed var(--muted);background:transparent;color:var(--fg);cursor:pointer;flex:none}
+.plus.small{width:30px;height:30px;font-size:16px}
+.newcity{display:flex;gap:6px}
+.newcity input{width:180px;text-align:left}
+.btn{font:500 14px var(--body);padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+@media (max-width:880px){.grid{grid-template-columns:minmax(0,1fr)}.addcity{margin-left:0}}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;align-items:start}
+fieldset{margin:0;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:9px;min-width:0}
+legend{font-family:var(--display);font-weight:500;text-transform:uppercase;letter-spacing:1px;font-size:14px;color:var(--muted);padding:0 6px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px;align-items:center}
+.row.two{grid-template-columns:minmax(0,1fr) 30px 112px 84px}
+.row.st{grid-template-columns:minmax(0,1fr) 124px}
+.stepper{display:grid;grid-template-columns:34px minmax(0,1fr) 34px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg)}
+.stepper input{border:0;border-radius:0;text-align:center;padding:7px 2px;background:transparent}
+.stepper button{border:0;background:var(--soft);color:var(--fg);font:600 18px var(--body);cursor:pointer;touch-action:manipulation}
+.stepper button:disabled{opacity:.35}
+.tog{width:26px;height:26px;border-radius:50%;border:0;cursor:pointer;background:var(--good);box-shadow:inset 0 0 0 3px rgba(255,255,255,.35);touch-action:manipulation}
+.tog.off{background:var(--bad)}
+.row.off label{color:var(--muted);text-decoration:line-through}
+input:disabled{opacity:.5}
+.row.item{grid-template-columns:28px minmax(0,1fr) 84px 28px;gap:8px}
+.row.item.off .name{text-decoration:line-through;color:var(--muted)}
+.row label{min-width:0}
+.hint{font-size:12px;color:var(--muted);display:block}
+input{width:100%;font:500 16px var(--body);font-variant-numeric:tabular-nums;text-align:right;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+input.name{text-align:left}
+.head{display:grid;grid-template-columns:minmax(0,1fr) 30px 112px 84px;gap:10px;font-size:12px;color:var(--muted);text-align:center}
+.head span:first-child{text-align:left}
+.nights{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:8px;background:var(--soft)}
+.nights .row{grid-template-columns:minmax(0,1fr) 110px}
+.sub{font-size:13px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.del{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
+.addrow{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px}
+.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--hero);color:var(--hero-fg);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.result h2{font-family:var(--display);font-weight:500;text-transform:uppercase;letter-spacing:1px;font-size:15px;color:var(--hero-muted);margin:0}
+.big{font-family:var(--display);font-weight:600;font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+.kv{display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(255,255,255,.15);padding-top:12px}
+.kv div{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
+.kv span:first-child{color:var(--hero-muted)}
+.pill{display:inline-block;font-weight:600;font-size:13px;padding:3px 10px;border-radius:999px}
+.pill.good{background:var(--good);color:#fff}.pill.bad{background:var(--bad);color:#fff}
+.target{display:flex;flex-direction:column;gap:8px;border-top:1px solid rgba(255,255,255,.15);padding-top:12px}
+.target .row{grid-template-columns:minmax(0,1fr) 120px}
+.target input{background:rgba(255,255,255,.08);color:var(--hero-fg);border-color:rgba(255,255,255,.2)}
+.target strong{font-family:var(--display);font-size:28px;color:var(--accent)}
+.note{font-size:12px;color:var(--muted)}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Калькулятор тура</h1>
+    <p>Себестоимость группы, цена с человека и чистая прибыль. Меняйте цифры — всё пересчитывается сразу.</p>
+  </header>
+
+  <div class="presets">
+    <div class="presets" id="presets" aria-label="Готовые программы"></div>
+    <div class="addcity">
+      <div class="newcity" id="newcity" hidden>
+        <input id="cityName" class="name" type="text" placeholder="Город или программа">
+        <button type="button" class="btn primary" id="saveCity">Сохранить</button>
+        <button type="button" class="btn" id="cancelCity">Отмена</button>
+      </div>
+      <button type="button" class="plus" id="addCity" title="Добавить город" aria-label="Добавить город">+</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="form" id="f">
+      <fieldset>
+        <legend>Группа</legend>
+        <div class="row st"><label for="payers">Оплачивающих<span class="hint">школьники и родители</span></label><div class="stepper"><button type="button" data-step="-1" data-for="payers" aria-label="Минус">−</button><input id="payers" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="payers" aria-label="Плюс">+</button></div></div>
+        <div class="row st"><label for="escorts">Сопровождающих бесплатно<span class="hint">их расходы делятся на оплачивающих</span></label><div class="stepper"><button type="button" data-step="-1" data-for="escorts" aria-label="Минус">−</button><input id="escorts" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="escorts" aria-label="Плюс">+</button></div></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Проживание, ₽ с человека</legend>
+        <div class="row st"><label for="nights">Ночей в гостинице</label><div class="stepper"><button type="button" data-step="-1" data-for="nights" aria-label="Минус">−</button><input id="nights" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="nights" aria-label="Плюс">+</button></div></div>
+        <div class="nights" id="nightList"></div>
+        <div class="sub" id="hotelSum"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Питание</legend>
+        <div class="head"><span></span><span>есть</span><span>раз</span><span>₽ за раз</span></div>
+        <div class="row two" id="rowb"><label for="bN">Завтрак</label><button type="button" class="tog" data-tog="b" aria-label="Завтрак: есть или нет"></button><div class="stepper"><button type="button" data-step="-1" data-for="bN" aria-label="Минус">−</button><input id="bN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="bN" aria-label="Плюс">+</button></div><input id="bP" class="num" type="text" inputmode="numeric" aria-label="Цена завтрака"></div><div class="row two" id="rowl"><label for="lN">Обед</label><button type="button" class="tog" data-tog="l" aria-label="Обед: есть или нет"></button><div class="stepper"><button type="button" data-step="-1" data-for="lN" aria-label="Минус">−</button><input id="lN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="lN" aria-label="Плюс">+</button></div><input id="lP" class="num" type="text" inputmode="numeric" aria-label="Цена обеда"></div><div class="row two" id="rowd"><label for="dN">Ужин</label><button type="button" class="tog" data-tog="d" aria-label="Ужин: есть или нет"></button><div class="stepper"><button type="button" data-step="-1" data-for="dN" aria-label="Минус">−</button><input id="dN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="dN" aria-label="Плюс">+</button></div><input id="dP" class="num" type="text" inputmode="numeric" aria-label="Цена ужина"></div>
+        <div class="hint" style="margin-top:4px">Дополнительно</div>
+        <div class="row two" id="rowm"><label for="mN">Обед в горах</label><button type="button" class="tog" data-tog="m" aria-label="Обед в горах: есть или нет"></button><div class="stepper"><button type="button" data-step="-1" data-for="mN" aria-label="Минус">−</button><input id="mN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="mN" aria-label="Плюс">+</button></div><input id="mP" class="num" type="text" inputmode="numeric" aria-label="Цена обеда в горах"></div><div class="row two" id="rowr"><label for="rN">Сухой паёк</label><button type="button" class="tog" data-tog="r" aria-label="Сухой паёк: есть или нет"></button><div class="stepper"><button type="button" data-step="-1" data-for="rN" aria-label="Минус">−</button><input id="rN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="rN" aria-label="Плюс">+</button></div><input id="rP" class="num" type="text" inputmode="numeric" aria-label="Цена сухого пайка"></div>
+        
+        
+        
+        
+        <div class="sub" id="mealsSum"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Билеты и прочее, ₽ с человека</legend>
+        <div id="perList"></div>
+        <div class="addrow"><button type="button" class="plus small" id="addPer" aria-label="Добавить расход на человека">+</button>Добавить расход на человека</div>
+        <div class="sub" id="perSum"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>На всю группу, ₽</legend>
+        <div id="groupList"></div>
+        <div class="addrow"><button type="button" class="plus small" id="addGroup" aria-label="Добавить расход на группу">+</button>Добавить расход на группу</div>
+        <div class="sub" id="groupSum"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Цена</legend>
+        <div class="row"><label for="price">Цена с человека, ₽<span class="hint">без ж/д билетов</span></label><input id="price" class="num" type="text" inputmode="numeric"></div>
+      </fieldset>
+    </div>
+
+    <aside class="result" aria-live="polite">
+      <h2>Чистая прибыль с группы</h2>
+      <div class="big" id="profit">—</div>
+      <div><span class="pill" id="status"></span></div>
+      <div class="kv">
+        <div><span>Выручка</span><span id="revenue"></span></div>
+        <div><span>Себестоимость группы</span><span id="total"></span></div>
+        <div><span>Расходы на 1 человека</span><span id="perPerson"></span></div>
+        <div><span>Себестоимость на оплачивающего</span><span id="perPayer"></span></div>
+        <div><span>Прибыль с оплачивающего</span><span id="profitPer"></span></div>
+        <div><span>Безубыточность</span><span id="breakeven"></span></div>
+      </div>
+      <div class="target">
+        <div class="row"><label for="goal">Хочу прибыль, ₽</label><input id="goal" class="num" type="text" inputmode="numeric"></div>
+        <div>Нужная цена: <strong id="needPrice">—</strong></div>
+      </div>
+    </aside>
+  </div>
+
+  <p class="note">Расценки по умолчанию — из наших расчётов: гостиница 500 ₽, завтрак 250 ₽, обед 400 ₽, ужин 350 ₽, гид и фотограф по 250 ₽ с человека. Кружок у строки выключает её из расчёта. Чтобы сохранить программу, нажмите «+» и дайте ей название. Автобус и гид — ориентиры, уточняйте у перевозчика. Цифры и сохранённые программы хранятся на этом телефоне. Работает без интернета.</p>
+</div>
+
+<script>
+const DEFAULT={payers:50,escorts:3,nightPrices:[1000,500],
+  bN:2,bP:250,lN:1,lP:400,dN:1,dP:350,mN:1,mP:400,rN:1,rP:250,on:{b:true,l:true,d:true,m:false,r:false},
+  per:[{name:"«Грозный-Сити»",val:200,on:true},{name:"Гид",val:250,on:true},{name:"Фотограф",val:250,on:true},{name:"Премиальный фонд",val:0,on:true},{name:"Музей",val:200,on:false},{name:"Водопады",val:150,on:false}],
+  group:[{name:"Автобус на месте",val:165000,on:true},{name:"Парковка",val:200,on:true},{name:"Гид в Осетии",val:20000,on:false}],
+  price:19800,goal:250000};
+const BUILTIN={};
+const SIMPLE=["payers","escorts","bN","bP","lN","lP","mN","mP","dN","dP","rN","rP","price","goal"];
+const $=id=>document.getElementById(id);
+const num=x=>Math.max(0,parseFloat(String(x).replace(/\s/g,'').replace(',','.'))||0);
+const MEALS=['b','l','m','d','r'];
+const ensureOn=st=>{st.on=Object.assign({b:true,l:true,m:true,d:true,r:true},st.on||{});return st;};
+const rub=n=>isFinite(n)?Math.round(n).toLocaleString('ru-RU')+' ₽':'—';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let state, current=null, custom={};
+try{custom=JSON.parse(localStorage.getItem('tourcalc_custom')||'{}')||{}}catch(e){custom={}}
+const allPresets=()=>Object.assign({},BUILTIN,custom);
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+function keepFocus(fn){const a=document.activeElement;const id=a&&a.id;fn();if(id&&document.activeElement!==a){const el=document.getElementById(id);if(el&&!el.disabled){el.focus({preventScroll:true});}}}
+function renderNights(){keepFocus(renderNights0);}
+function renderNights0(){
+  const box=$('nightList'); const n=state.nightPrices.length;
+  box.hidden=n===0;
+  box.innerHTML=state.nightPrices.map((v,i)=>`<div class="row"><label for="night${i}">${i+1}-я ночь</label><input id="night${i}" data-night="${i}" class="num" type="text" inputmode="numeric" value="${v}"></div>`).join('');
+}
+function renderList(kind){keepFocus(()=>renderList0(kind));}
+function renderList0(kind){
+  const box=$(kind==='per'?'perList':'groupList');
+  box.innerHTML=state[kind].map((it,i)=>`<div class="row item${it.on===false?' off':''}" style="margin-bottom:8px">
+    <button type="button" class="tog${it.on===false?' off':''}" data-itog="${kind}" data-i="${i}" aria-label="Учитывать: да или нет"></button>
+    <input class="name" id="${kind}n${i}" data-kind="${kind}" data-i="${i}" data-f="name" type="text" value="${esc(it.name)}" aria-label="Название">
+    <input id="${kind}v${i}" data-kind="${kind}" data-i="${i}" data-f="val" class="num" type="text" inputmode="numeric" value="${it.on===false?'':it.val}" placeholder="${it.on===false?'—':''}" ${it.on===false?'disabled':''} aria-label="Сумма">
+    <button type="button" class="del" data-del="${kind}" data-i="${i}" aria-label="Удалить">×</button></div>`).join('');
+}
+function renderMeals(){
+  MEALS.forEach(k=>{
+    const on=state.on[k]; $('row'+k).classList.toggle('off',!on);
+    const t=document.querySelector(`[data-tog="${k}"]`); t.classList.toggle('off',!on); t.setAttribute('aria-pressed',on?'true':'false');
+    [k+'N',k+'P'].forEach(id=>{const el=$(id); el.disabled=!on; el.value=on?state[id]:''; el.placeholder=on?'':'—';});
+    document.querySelectorAll(`[data-for="${k}N"]`).forEach(b=>b.disabled=!on);
+  });
+}
+function fill(){
+  ensureOn(state);
+  SIMPLE.forEach(k=>{$(k).value=state[k]});
+  $('nights').value=state.nightPrices.length;
+  renderNights(); renderList('per'); renderList('group'); renderMeals();
+}
+function calc(){
+  const s=state, payers=Math.max(1,num(s.payers)), escorts=num(s.escorts), people=payers+escorts;
+  const hotel=s.nightPrices.reduce((a,b)=>a+num(b),0);
+  const on=s.on; const mc=k=>on[k]?num(s[k+'N']):0; const meals=MEALS.reduce((a,k)=>a+mc(k)*num(s[k+'P']),0);
+  const per=s.per.reduce((a,b)=>a+(b.on===false?0:num(b.val)),0);
+  const group=s.group.reduce((a,b)=>a+(b.on===false?0:num(b.val)),0);
+  const perPerson=hotel+meals+per;
+  const total=perPerson*people+group;
+  const price=num(s.price), revenue=price*payers, profit=revenue-total;
+  $('hotelSum').textContent=`${s.nightPrices.length} ноч. · ${rub(hotel)} с человека`;
+  $('mealsSum').textContent=`${MEALS.reduce((a,k)=>a+mc(k),0)} приёмов пищи · ${rub(meals)} с человека`;
+  $('perSum').textContent=`Итого ${rub(per)} с человека`;
+  $('groupSum').textContent=`Итого ${rub(group)} на группу`;
+  $('profit').textContent=rub(profit);
+  $('revenue').textContent=rub(revenue);
+  $('total').textContent=rub(total);
+  $('perPerson').textContent=rub(perPerson);
+  $('perPayer').textContent=rub(total/payers);
+  $('profitPer').textContent=rub(profit/payers);
+  const st=$('status'); st.className='pill '+(profit>=0?'good':'bad'); st.textContent=profit>=0?'В плюсе':'Убыток';
+  const margin=price-perPerson;
+  $('breakeven').textContent=margin>0?`от ${Math.ceil((perPerson*escorts+group)/margin)} оплачивающих`:'не выходит';
+  $('needPrice').textContent=rub(Math.ceil(((total+num(s.goal))/payers)/100)*100);
+  try{localStorage.setItem('tourcalc_state3',JSON.stringify({state,current}))}catch(e){}
+  scheduleCloud();
+}
+function renderPresets(){
+  const box=$('presets'); box.innerHTML='';
+  Object.keys(allPresets()).forEach(name=>{
+    const chip=document.createElement('span'); chip.className='chip'+(name===current?' on':'');
+    const b=document.createElement('button'); b.type='button'; b.textContent=name;
+    b.addEventListener('click',()=>{current=name;state=ensureOn(clone(allPresets()[name]));fill();renderPresets();calc();});
+    chip.appendChild(b);
+    if(custom[name]){
+      const x=document.createElement('button'); x.type='button'; x.className='x'; x.textContent='×'; x.setAttribute('aria-label','Удалить '+name);
+      x.addEventListener('click',()=>{delete custom[name]; saveCustom(); if(current===name) current=null; renderPresets();});
+      chip.appendChild(x);
+    }
+    box.appendChild(chip);
+  });
+}
+function saveCustom(){try{localStorage.setItem('tourcalc_custom',JSON.stringify(custom))}catch(e){} scheduleCloud();}
+
+// events
+$('f').addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='nights'){ setNights(parseInt(t.value)||0); } else if(t.dataset.night!==undefined){ state.nightPrices[+t.dataset.night]=num(t.value); }
+  else if(t.dataset.kind){ const it=state[t.dataset.kind][+t.dataset.i]; it[t.dataset.f]=t.dataset.f==='val'?num(t.value):t.value; }
+  else if(SIMPLE.includes(t.id)){ state[t.id]=num(t.value); }
+  if(current){current=null;renderPresets();}
+  calc();
+});
+function setNights(n){
+  n=Math.min(14,Math.max(0,n)); const arr=state.nightPrices; const last=arr.length?arr[arr.length-1]:500;
+  while(arr.length<n) arr.push(last); arr.length=n; renderNights();
+}
+$('f').addEventListener('click',e=>{
+  const st=e.target.closest('[data-step]');
+  if(st){
+    const id=st.dataset.for, d=+st.dataset.step;
+    if(id==='nights'){ setNights(state.nightPrices.length+d); $('nights').value=state.nightPrices.length; }
+    else { const min=id==='payers'?1:0; state[id]=Math.max(min,num(state[id])+d); $(id).value=state[id]; }
+    if(current){current=null;renderPresets();} calc(); return;
+  }
+  const it=e.target.closest('[data-itog]');
+  if(it){ const o=state[it.dataset.itog][+it.dataset.i]; o.on=o.on===false; renderList(it.dataset.itog); if(current){current=null;renderPresets();} calc(); return; }
+  const tg=e.target.closest('[data-tog]');
+  if(tg){ const k=tg.dataset.tog; state.on[k]=!state.on[k]; renderMeals(); if(current){current=null;renderPresets();} calc(); return; }
+  const d=e.target.closest('[data-del]'); if(!d) return;
+  state[d.dataset.del].splice(+d.dataset.i,1); renderList(d.dataset.del); calc();
+});
+$('addPer').addEventListener('click',()=>{state.per.push({name:'Новый расход',val:0,on:true});renderList('per');calc();const i=state.per.length-1;$('pern'+i).focus();$('pern'+i).select();});
+$('addGroup').addEventListener('click',()=>{state.group.push({name:'Новый расход',val:0,on:true});renderList('group');calc();const i=state.group.length-1;$('groupn'+i).focus();$('groupn'+i).select();});
+$('goal').addEventListener('input',e=>{state.goal=num(e.target.value);calc();});
+$('addCity').addEventListener('click',()=>{$('newcity').hidden=false;$('addCity').hidden=true;$('cityName').value='';$('cityName').focus();});
+$('cancelCity').addEventListener('click',()=>{$('newcity').hidden=true;$('addCity').hidden=false;});
+function saveCity(){
+  const name=$('cityName').value.trim(); if(!name){$('cityName').focus();return;}
+  custom[name]=clone(ensureOn(state)); saveCustom(); current=name;
+  $('newcity').hidden=true; $('addCity').hidden=false; renderPresets(); calc();
+}
+$('saveCity').addEventListener('click',saveCity);
+$('cityName').addEventListener('keydown',e=>{if(e.key==='Enter')saveCity();if(e.key==='Escape')$('cancelCity').click();});
+
+document.addEventListener('focusin',e=>{
+  const t=e.target; if(!(t instanceof HTMLInputElement)||t.disabled) return;
+  const sel=()=>{try{t.select();t.setSelectionRange(0,t.value.length)}catch(_){}};
+  setTimeout(sel,0); setTimeout(sel,80);
+});
+document.addEventListener('mouseup',e=>{if(e.target instanceof HTMLInputElement&&e.target===document.activeElement)e.preventDefault();});
+['pointerdown','mousedown','touchstart'].forEach(ev=>document.addEventListener(ev,e=>{
+  if(e.target.closest('[data-step],[data-tog],[data-itog],[data-del]')&&document.activeElement instanceof HTMLInputElement) e.preventDefault();
+},{passive:false}));
+// cloud sync (per-viewer private doc); falls back to this browser's storage
+let cloudRef=null, cloudTimer=null, cloudBusy=Promise.resolve(), cloudReady=false;
+function scheduleCloud(){ if(!cloudRef||!cloudReady) return; clearTimeout(cloudTimer); cloudTimer=setTimeout(()=>{
+  const body=JSON.parse(JSON.stringify({state,current,custom,savedAt:Date.now()}));
+  cloudBusy=cloudBusy.then(()=>cloudRef.set(body)).catch(()=>{});
+},800); }
+(async()=>{
+  try{
+    if(!window.claude||!claude.use) return;
+    const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);
+    if(!db||!user) return;
+    const uid=await user.id(); if(!uid) return;
+    cloudRef=db.doc('data/users/'+uid+'/calc');
+    const snap=await cloudRef.get();
+    if(snap.exists){
+      const d=snap.data()||{};
+      if(d.custom&&typeof d.custom==='object') custom=JSON.parse(JSON.stringify(d.custom));
+      if(d.state&&Array.isArray(d.state.nightPrices)){ state=ensureOn(JSON.parse(JSON.stringify(d.state))); current=d.current&&allPresets()[d.current]?d.current:null; }
+      const a=document.activeElement; if(!(a instanceof HTMLInputElement)){ fill(); renderPresets(); }
+      cloudReady=true; calc();
+    } else { cloudReady=true; scheduleCloud(); }
+  }catch(e){ cloudRef=null; }
+})();
+// start
+let saved=null; try{saved=JSON.parse(localStorage.getItem('tourcalc_state3')||'null')}catch(e){}
+if(saved&&saved.state&&Array.isArray(saved.state.nightPrices)){state=ensureOn(saved.state);current=saved.current&&allPresets()[saved.current]?saved.current:null;}
+else{current=null;state=ensureOn(clone(DEFAULT));}
+fill(); renderPresets(); calc();
+</script>
+
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}</script>
+</body>
+</html>
