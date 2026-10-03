@@ -272,34 +272,30 @@ function renderMeals(){
   });
 }
 function fill(){
-  ensureOn(state);
+  ensureOn(state); nightMem=[];
   SIMPLE.forEach(k=>{$(k).value=state[k]});
   $('nights').value=state.nightPrices.length;
   $('tripDate').value=state.date||''; $('tripNote').value=state.note||'';
   renderNights(); renderList('per'); renderList('group'); renderMeals();
 }
+// the one place where money is counted: result panel and city chips both use it
 function totals(s){
-  const payers=Math.max(1,num(s.payers)), people=payers+num(s.escorts); ensureOn(s);
+  ensureOn(s); const payers=num(s.payers), escorts=num(s.escorts), people=payers+escorts;
   const hotel=(s.nightPrices||[]).reduce((a,b)=>a+num(b),0);
-  const meals=MEALS.reduce((a,k)=>a+(s.on[k]?num(s[k+'N']):0)*num(s[k+'P']),0);
+  const mc=k=>s.on[k]?num(s[k+'N']):0; const mealsN=MEALS.reduce((a,k)=>a+mc(k),0);
+  const meals=MEALS.reduce((a,k)=>a+mc(k)*num(s[k+'P']),0);
   const per=(s.per||[]).reduce((a,b)=>a+(b.on===false?0:num(b.val)),0);
   const group=(s.group||[]).reduce((a,b)=>a+(b.on===false?0:num(b.val)),0);
-  const total=(hotel+meals+per)*people+hotel*num(s.drivers)+group; return {price:num(s.price), profit:num(s.price)*payers-total, total, payers, costPer:total/payers};
+  const perPerson=hotel+meals+per, driversCost=hotel*num(s.drivers);
+  const total=perPerson*people+driversCost+group, price=num(s.price), revenue=price*payers;
+  return {payers, escorts, hotel, mealsN, meals, per, group, perPerson, driversCost, total, price, revenue, profit:revenue-total};
 }
 const short=n=>Math.abs(n)>=1000?(Math.round(n/1000)).toLocaleString('ru-RU')+' тыс':Math.round(n)+'';
 function commit(){ if(current&&custom[current]){ custom[current]=clone(state); saveCustom(); updateChip(); } }
 function calc(){
-  const s=state, payers=Math.max(1,num(s.payers)), escorts=num(s.escorts), people=payers+escorts;
-  const hotel=s.nightPrices.reduce((a,b)=>a+num(b),0);
-  const on=s.on; const mc=k=>on[k]?num(s[k+'N']):0; const meals=MEALS.reduce((a,k)=>a+mc(k)*num(s[k+'P']),0);
-  const per=s.per.reduce((a,b)=>a+(b.on===false?0:num(b.val)),0);
-  const group=s.group.reduce((a,b)=>a+(b.on===false?0:num(b.val)),0);
-  const perPerson=hotel+meals+per;
-  const driversCost=hotel*num(s.drivers);
-  const total=perPerson*people+driversCost+group;
-  const price=num(s.price), revenue=price*payers, profit=revenue-total;
+  const s=state, {payers, escorts, hotel, mealsN, meals, per, group, perPerson, driversCost, total, price, revenue, profit}=totals(s);
   $('hotelSum').textContent=`${s.nightPrices.length} ноч. · ${rub(hotel)} с человека`+(num(s.drivers)?` · водители ${rub(driversCost)}`:'');
-  $('mealsSum').textContent=`${MEALS.reduce((a,k)=>a+mc(k),0)} приёмов пищи · ${rub(meals)} с человека`;
+  $('mealsSum').textContent=`${mealsN} приёмов пищи · ${rub(meals)} с человека`;
   $('perSum').textContent=`Итого ${rub(per)} с человека`;
   $('groupSum').textContent=`Итого ${rub(group)} на группу`;
   $('profit').textContent=rub(profit);
@@ -310,7 +306,7 @@ function calc(){
   $('profitPer').textContent=rub(profit/payers);
   const st=$('status'); st.className='pill '+(profit>=0?'good':'bad'); st.textContent=profit>=0?'В плюсе':'Убыток';
   const margin=price-perPerson;
-  $('breakeven').textContent=margin>0?`от ${Math.ceil((perPerson*escorts+driversCost+group)/margin)} оплачивающих`:'не выходит';
+  $('breakeven').textContent=margin>0?`от ${Math.max(1,Math.ceil((perPerson*escorts+driversCost+group)/margin))} оплачивающих`:'не выходит';
   $('needPrice').textContent=rub(Math.ceil(((total+num(s.goal))/payers)/100)*100);
   try{localStorage.setItem('tourcalc_state3',JSON.stringify({state,current}))}catch(e){}
   scheduleCloud();
@@ -334,16 +330,20 @@ function saveCustom(){try{localStorage.setItem('tourcalc_custom',JSON.stringify(
 // events
 $('f').addEventListener('input',e=>{
   const t=e.target;
-  if(t.id==='nights'){ setNights(parseInt(t.value)||0); } else if(t.dataset.night!==undefined){ state.nightPrices[+t.dataset.night]=num(t.value); }
+  if(t.id==='nights'){ setNights(parseInt(t.value)||0); if(t.value.trim()!==''&&t.value.trim()!==String(state.nightPrices.length)) t.value=state.nightPrices.length; } else if(t.dataset.night!==undefined){ state.nightPrices[+t.dataset.night]=num(t.value); }
   else if(t.dataset.kind){ const it=state[t.dataset.kind][+t.dataset.i]; it[t.dataset.f]=t.dataset.f==='val'?num(t.value):t.value; }
   else if(SIMPLE.includes(t.id)){ state[t.id]=num(t.value); }
   else if(t.id==='tripDate'){ state.date=t.value; }
   else if(t.id==='tripNote'){ state.note=t.value; }
   calc(); commit();
 });
+// nightMem keeps prices of removed nights, so clearing the field or stepping down and back up does not lose them
+let nightMem=[];
 function setNights(n){
-  n=Math.min(14,Math.max(0,n)); const arr=state.nightPrices; const last=arr.length?arr[arr.length-1]:500;
-  while(arr.length<n) arr.push(last); arr.length=n; renderNights();
+  n=Math.min(14,Math.max(0,n)); const arr=state.nightPrices;
+  if(n<arr.length) nightMem=arr.concat(nightMem.slice(arr.length));
+  while(arr.length<n) arr.push(arr.length<nightMem.length?nightMem[arr.length]:(arr.length?arr[arr.length-1]:500));
+  arr.length=n; renderNights();
 }
 $('f').addEventListener('click',e=>{
   const st=e.target.closest('[data-step]');
