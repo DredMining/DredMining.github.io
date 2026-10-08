@@ -50,13 +50,25 @@ header p{margin:4px 0 0;color:var(--muted)}
 .chip .x{padding:8px 10px 8px 2px;color:var(--muted)}
 .chip button .pp{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:1px}
 .chip.on button .pp{color:var(--accent-ink);opacity:.8}
+#presets{flex:1 1 100%;min-width:0}
+.chip{flex:none}
+.chip.add{border-style:dashed;background:transparent}
+.chip.add button{color:var(--muted);align-self:stretch}
+@media (max-width:880px){
+  /* phones: cities in one swipeable row instead of one per line */
+  #presets{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding:2px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  #presets::-webkit-scrollbar{display:none}
+  #presets .chip.add{order:-1}
+  header p{font-size:14px}
+}
 .citybar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
 .citybar strong{color:var(--fg)}
 .citybar .sp{flex:1}
-.btn.danger{border-color:var(--bad);color:var(--bad)}
+.citybar .btn{font-size:13px;padding:5px 10px}
+.btn.danger{color:var(--bad)}
+#cityConfirm .btn.danger{border-color:var(--bad)}
 .newcity{flex-wrap:wrap}
 .newcity .hint{width:100%}
-.addcity{margin-left:auto;display:flex;gap:8px;align-items:center}
 .plus{font:600 18px var(--body);width:38px;height:38px;border-radius:999px;border:1px dashed var(--muted);background:transparent;color:var(--fg);cursor:pointer;flex:none}
 .plus.small{width:30px;height:30px;font-size:16px}
 .newcity{display:flex;gap:6px}
@@ -65,8 +77,10 @@ header p{margin:4px 0 0;color:var(--muted)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
-@media (max-width:880px){.grid{grid-template-columns:minmax(0,1fr)}.addcity{margin-left:0}}
-.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;align-items:start}
+@media (max-width:880px){.grid{grid-template-columns:minmax(0,1fr)}}
+/* columns, not a grid: cards stack without empty holes between rows */
+.form{columns:2 280px;column-gap:16px}
+.form>fieldset{break-inside:avoid;margin-bottom:16px}
 fieldset{margin:0;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:9px;min-width:0}
 legend{font-family:var(--display);font-weight:500;text-transform:uppercase;letter-spacing:1px;font-size:14px;color:var(--muted);padding:0 6px}
 .row{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px;align-items:center}
@@ -76,12 +90,20 @@ legend{font-family:var(--display);font-weight:500;text-transform:uppercase;lette
 .stepper input{border:0;border-radius:0;text-align:center;padding:7px 2px;background:transparent}
 .stepper button{border:0;background:var(--soft);color:var(--fg);font:600 18px var(--body);cursor:pointer;touch-action:manipulation}
 .stepper button:disabled{opacity:.35}
-.tog{width:26px;height:26px;border-radius:50%;border:0;cursor:pointer;background:var(--good);box-shadow:inset 0 0 0 3px rgba(255,255,255,.35);touch-action:manipulation}
-.tog.off{background:var(--bad)}
+/* in the calculation = filled circle with a tick; left out = empty circle */
+.tog{position:relative;width:28px;height:28px;padding:0;border-radius:50%;border:2px solid var(--good);cursor:pointer;background:var(--good);touch-action:manipulation}
+.tog::after{content:"";position:absolute;left:50%;top:46%;width:6px;height:11px;border:solid var(--panel);border-width:0 2.5px 2.5px 0;transform:translate(-50%,-50%) rotate(45deg)}
+.tog.off{background:transparent;border-color:var(--muted)}
+.tog.off::after{display:none}
 .row.off label{color:var(--muted);text-decoration:line-through}
 input:disabled{opacity:.5}
-.row.item{grid-template-columns:28px minmax(0,1fr) 84px 28px;gap:8px}
+.row.item{grid-template-columns:30px minmax(0,1fr) 76px 28px;gap:6px}
+#groupList .row.item{grid-template-columns:30px minmax(0,1fr) 92px 28px}
 .row.item.off .name{text-decoration:line-through;color:var(--muted)}
+/* item names read as labels; the box shows up when you touch them */
+.row.item input.name{background:transparent;border-color:transparent;padding-inline:4px}
+.row.item input.name:hover,.row.item input.name:focus{background:var(--bg);border-color:var(--line)}
+.row.item input.name:not(:focus){text-overflow:ellipsis}
 .row label{min-width:0}
 .hint{font-size:12px;color:var(--muted);display:block}
 input{width:100%;font:500 16px var(--body);font-variant-numeric:tabular-nums;text-align:right;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
@@ -90,15 +112,58 @@ input.name{text-align:left}
 .head span:first-child{text-align:left}
 .nights{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:8px;background:var(--soft)}
 .nights .row{grid-template-columns:minmax(0,1fr) 110px}
-.sub{font-size:13px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.sub{font-size:13px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;border-top:1px solid var(--line);padding-top:8px}
+.sub b{color:var(--fg);font-weight:600}
+fieldset.pricebox{border-color:var(--accent)}
+#price{font-size:20px!important;font-weight:600}
 .del{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
 .addrow{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px}
-.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--hero);color:var(--hero-fg);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);scroll-margin-top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--hero);color:var(--hero-fg);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .result h2{font-family:var(--display);font-weight:500;text-transform:uppercase;letter-spacing:1px;font-size:15px;color:var(--hero-muted);margin:0}
-.big{font-family:var(--display);font-weight:600;font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+.big{font-family:var(--display);font-weight:600;font-size:44px;line-height:1}
+.big.neg{color:#FF8A94}
 .kv{display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(255,255,255,.15);padding-top:12px}
 .kv div{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
 .kv span:first-child{color:var(--hero-muted)}
+.kv span:last-child{white-space:nowrap;text-align:right}
+#breakeven{white-space:normal}
+/* "what the price is made of": one stacked bar per paying person + legend with the numbers */
+.result{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300}
+.mix{display:flex;flex-direction:column;gap:10px;border-top:1px solid rgba(255,255,255,.15);padding-top:12px}
+.mixhead{display:flex;justify-content:space-between;gap:12px;color:var(--hero-muted)}
+.mixhead b{color:var(--hero-fg);font-weight:500;white-space:nowrap}
+.bar{position:relative;display:flex;gap:2px;height:16px;margin:2px 0}
+.bar i{display:block;min-width:2px;background:var(--c);transition:opacity .15s}
+.bar i:last-of-type{border-radius:0 4px 4px 0}
+.bar .tick{position:absolute;top:-5px;bottom:-5px;width:2px;margin-left:-1px;background:var(--hero-fg);border-radius:1px}
+.legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;font-size:14px}
+.legend li{display:grid;grid-template-columns:10px minmax(0,1fr) auto 38px;gap:8px;align-items:center;font-variant-numeric:tabular-nums;transition:opacity .15s}
+.legend .sw{width:10px;height:10px;border-radius:2px;background:var(--c)}
+.legend .sw.tk{width:2px;height:14px;justify-self:center;border-radius:1px;background:var(--hero-fg)}
+.legend .l{color:var(--hero-muted);min-width:0}
+.legend .v{white-space:nowrap;text-align:right}
+.legend .p{color:var(--hero-muted);text-align:right}
+.legend li.strong .l,.legend li.strong .v{color:var(--hero-fg);font-weight:600}
+.legend li.loss .l,.legend li.loss .v{color:#FF8A94;font-weight:600}
+.mix.hl .bar i:not(.on),.mix.hl .legend li:not(.on){opacity:.35}
+/* phones: the result is far below, so a small bar at the bottom keeps profit in sight */
+.dock{display:none}
+@media (max-width:880px){
+  body{padding-bottom:96px}
+  .dock{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:10;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr) 20px;gap:12px;align-items:end;padding:12px 14px 10px;border:0;border-radius:14px;background:var(--hero);color:var(--hero-fg);box-shadow:0 8px 28px rgba(0,0,0,.28);font:inherit;text-align:left;cursor:pointer;overflow:hidden;transition:opacity .2s,transform .2s}
+  .dock.away{opacity:0;pointer-events:none;transform:translateY(16px)}
+  .dock .dockbar{position:absolute;left:0;right:0;top:0;height:4px;display:flex;gap:2px}
+  .dock .dockbar i{display:block;min-width:2px;background:var(--c)}
+  .dock .k{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .dock .l{font-size:11px;color:var(--hero-muted);white-space:nowrap}
+  .dock .v{font-family:var(--display);font-weight:600;font-size:24px;line-height:1.05;white-space:nowrap}
+  .dock .v.neg{color:#FF8A94}
+  .dock .v2{font-weight:500;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .dock .go{font-size:18px;color:var(--hero-muted);align-self:center}
+}
+@media (max-width:359px){.dock{grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:8px;padding-inline:10px}.dock .go{display:none}.dock .v{font-size:20px}.dock .v2{font-size:13px}}
+@media (min-width:881px){.result{max-height:calc(100vh - 24px);overflow-y:auto}}
+.dock{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300}
 .pill{display:inline-block;font-weight:600;font-size:13px;padding:3px 10px;border-radius:999px}
 .pill.good{background:var(--good);color:#fff}.pill.bad{background:var(--bad);color:#fff}
 .target{display:flex;flex-direction:column;gap:8px;border-top:1px solid rgba(255,255,255,.15);padding-top:12px}
@@ -118,17 +183,13 @@ input.name{text-align:left}
     <p class="savest" id="saveStatus" aria-live="polite"></p>
   </header>
 
-  <div class="presets">
-    <div class="presets" id="presets" aria-label="Мои города"></div>
-    <div class="addcity">
-      <div class="newcity" id="newcity" hidden>
-        <input id="cityName" class="name" type="text" placeholder="Город или программа">
-        <button type="button" class="btn primary" id="saveCity">Создать</button>
-        <button type="button" class="btn" id="cancelCity">Отмена</button>
-        <span class="hint" id="newHint"></span>
-      </div>
-      <button type="button" class="plus" id="addCity" title="Добавить город" aria-label="Добавить город">+</button>
-    </div>
+  <div class="presets" id="presets" aria-label="Мои города"></div>
+  <span class="chip add" id="addChip"><button type="button" id="addCity" title="Добавить город">+ Новый город</button></span>
+  <div class="newcity" id="newcity" hidden>
+    <input id="cityName" class="name" type="text" placeholder="Город или программа">
+    <button type="button" class="btn primary" id="saveCity">Создать</button>
+    <button type="button" class="btn" id="cancelCity">Отмена</button>
+    <span class="hint" id="newHint"></span>
   </div>
 
   <div class="citybar" id="citybar">
@@ -193,7 +254,7 @@ input.name{text-align:left}
         <div class="sub" id="groupSum"></div>
       </fieldset>
 
-      <fieldset>
+      <fieldset class="pricebox">
         <legend>Цена</legend>
         <div class="row"><label for="price">Цена с человека, ₽<span class="hint">без ж/д билетов</span></label><input id="price" class="num" type="text" inputmode="numeric"></div>
       </fieldset>
@@ -209,6 +270,11 @@ input.name{text-align:left}
       <h2>Чистая прибыль с группы</h2>
       <div class="big" id="profit">—</div>
       <div><span class="pill" id="status"></span></div>
+      <div class="mix" id="mix">
+        <div class="mixhead"><span id="mixTitle">Из чего складывается цена</span><b id="mixTotal"></b></div>
+        <div class="bar" id="mixBar" role="img"></div>
+        <ul class="legend" id="mixLegend"></ul>
+      </div>
       <div class="kv">
         <div><span>Выручка</span><span id="revenue"></span></div>
         <div><span>Себестоимость группы</span><span id="total"></span></div>
@@ -224,8 +290,15 @@ input.name{text-align:left}
     </aside>
   </div>
 
-  <p class="note">Расценки по умолчанию — из наших расчётов: гостиница 500 ₽, завтрак 250 ₽, обед 400 ₽, ужин 350 ₽, гид и фотограф по 250 ₽ с человека. Кружок у строки выключает её из расчёта. Чтобы сохранить программу, нажмите «+» и дайте ей название. Автобус и гид — ориентиры, уточняйте у перевозчика. Цифры и города хранятся на этом телефоне. Работает без интернета.</p>
+  <p class="note">Расценки по умолчанию — из наших расчётов: гостиница 500 ₽, завтрак 250 ₽, обед 400 ₽, ужин 350 ₽, гид и фотограф по 250 ₽ с человека. Галочка у строки — она в расчёте; нажмите, чтобы убрать. Чтобы сохранить программу, нажмите «+ Новый город» и дайте ей название. Автобус и гид — ориентиры, уточняйте у перевозчика. Цифры и города хранятся на этом телефоне. Работает без интернета.</p>
 </div>
+<button type="button" class="dock" id="dock" aria-label="Показать итоги">
+  <span class="dockbar" id="dockBar" aria-hidden="true"></span>
+  <span class="k"><span class="l">Прибыль</span><span class="v" id="dockProfit">—</span></span>
+  <span class="k"><span class="l">Цена</span><span class="v2" id="dockPrice">—</span></span>
+  <span class="k"><span class="l">Себест. на чел.</span><span class="v2" id="dockCost">—</span></span>
+  <span class="go" aria-hidden="true">↓</span>
+</button>
 
 <script>
 const DEFAULT={payers:50,escorts:3,drivers:2,nightPrices:[1000,500],
@@ -239,10 +312,12 @@ const $=id=>document.getElementById(id);
 const num=x=>Math.max(0,parseFloat(String(x).replace(/\s/g,'').replace(',','.'))||0);
 const MEALS=['b','l','m','d','r'];
 const ensureOn=st=>{st.on=Object.assign({b:true,l:true,m:true,d:true,r:true},st.on||{}); if(st.drivers===undefined) st.drivers=2; return st;};
-const rub=n=>isFinite(n)?Math.round(n).toLocaleString('ru-RU')+' ₽':'—';
+const rub=n=>isFinite(n)?(Math.round(n)||0).toLocaleString('ru-RU').replace('-','−')+' ₽':'—';
+// numbers in fields are shown as 165 000, typing still accepts 165000
+const fmt=n=>(Number(n)||0).toLocaleString('ru-RU',{maximumFractionDigits:2});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-let state, current=null, custom={};
+let state, current=null, custom={}, resultSeen=false;
 try{custom=JSON.parse(localStorage.getItem('tourcalc_custom')||'{}')||{}}catch(e){custom={}}
 const allPresets=()=>Object.assign({},BUILTIN,custom);
 const clone=o=>JSON.parse(JSON.stringify(o));
@@ -252,7 +327,7 @@ function renderNights(){keepFocus(renderNights0);}
 function renderNights0(){
   const box=$('nightList'); const n=state.nightPrices.length;
   box.hidden=n===0;
-  box.innerHTML=state.nightPrices.map((v,i)=>`<div class="row"><label for="night${i}">${i+1}-я ночь</label><input id="night${i}" data-night="${i}" class="num" type="text" inputmode="numeric" value="${v}"></div>`).join('');
+  box.innerHTML=state.nightPrices.map((v,i)=>`<div class="row"><label for="night${i}">${i+1}-я ночь</label><input id="night${i}" data-night="${i}" class="num" type="text" inputmode="numeric" value="${fmt(v)}"></div>`).join('');
 }
 function renderList(kind){keepFocus(()=>renderList0(kind));}
 function renderList0(kind){
@@ -260,20 +335,20 @@ function renderList0(kind){
   box.innerHTML=state[kind].map((it,i)=>`<div class="row item${it.on===false?' off':''}" style="margin-bottom:8px">
     <button type="button" class="tog${it.on===false?' off':''}" data-itog="${kind}" data-i="${i}" aria-label="Учитывать: да или нет"></button>
     <input class="name" id="${kind}n${i}" data-kind="${kind}" data-i="${i}" data-f="name" type="text" value="${esc(it.name)}" aria-label="Название">
-    <input id="${kind}v${i}" data-kind="${kind}" data-i="${i}" data-f="val" class="num" type="text" inputmode="numeric" value="${it.on===false?'':it.val}" placeholder="${it.on===false?'—':''}" ${it.on===false?'disabled':''} aria-label="Сумма">
+    <input id="${kind}v${i}" data-kind="${kind}" data-i="${i}" data-f="val" class="num" type="text" inputmode="numeric" value="${it.on===false?'':fmt(it.val)}" placeholder="${it.on===false?'—':''}" ${it.on===false?'disabled':''} aria-label="Сумма">
     <button type="button" class="del" data-del="${kind}" data-i="${i}" aria-label="Удалить">×</button></div>`).join('');
 }
 function renderMeals(){
   MEALS.forEach(k=>{
     const on=state.on[k]; $('row'+k).classList.toggle('off',!on);
     const t=document.querySelector(`[data-tog="${k}"]`); t.classList.toggle('off',!on); t.setAttribute('aria-pressed',on?'true':'false');
-    [k+'N',k+'P'].forEach(id=>{const el=$(id); el.disabled=!on; el.value=on?state[id]:''; el.placeholder=on?'':'—';});
+    [k+'N',k+'P'].forEach(id=>{const el=$(id); el.disabled=!on; el.value=on?fmt(state[id]):''; el.placeholder=on?'':'—';});
     document.querySelectorAll(`[data-for="${k}N"]`).forEach(b=>b.disabled=!on);
   });
 }
 function fill(){
   ensureOn(state); nightMem=[];
-  SIMPLE.forEach(k=>{$(k).value=state[k]});
+  SIMPLE.forEach(k=>{$(k).value=fmt(state[k])});
   $('nights').value=state.nightPrices.length;
   $('tripDate').value=state.date||''; $('tripNote').value=state.note||'';
   renderNights(); renderList('per'); renderList('group'); renderMeals();
@@ -290,15 +365,15 @@ function totals(s){
   const total=perPerson*people+driversCost+group, price=num(s.price), revenue=price*payers;
   return {payers, escorts, hotel, mealsN, meals, per, group, perPerson, driversCost, total, price, revenue, profit:revenue-total};
 }
-const short=n=>Math.abs(n)>=1000?(Math.round(n/1000)).toLocaleString('ru-RU')+' тыс':Math.round(n)+'';
+const short=n=>(Math.abs(n)>=1000?(Math.round(n/1000)).toLocaleString('ru-RU')+' тыс':Math.round(n)+'').replace('-','−');
 function commit(){ if(current&&custom[current]){ custom[current]=clone(state); saveCustom(); updateChip(); } }
 function calc(){
   const s=state, {payers, escorts, hotel, mealsN, meals, per, group, perPerson, driversCost, total, price, revenue, profit}=totals(s);
-  $('hotelSum').textContent=`${s.nightPrices.length} ноч. · ${rub(hotel)} с человека`+(num(s.drivers)?` · водители ${rub(driversCost)}`:'');
-  $('mealsSum').textContent=`${mealsN} приёмов пищи · ${rub(meals)} с человека`;
-  $('perSum').textContent=`Итого ${rub(per)} с человека`;
-  $('groupSum').textContent=`Итого ${rub(group)} на группу`;
-  $('profit').textContent=rub(profit);
+  $('hotelSum').innerHTML=`${s.nightPrices.length} ноч. · <b>${rub(hotel)}</b> с человека`+(num(s.drivers)?` · водители <b>${rub(driversCost)}</b>`:'');
+  $('mealsSum').innerHTML=`${mealsN} приёмов пищи · <b>${rub(meals)}</b> с человека`;
+  $('perSum').innerHTML=`Итого <b>${rub(per)}</b> с человека`;
+  $('groupSum').innerHTML=`Итого <b>${rub(group)}</b> на группу`;
+  $('profit').textContent=rub(profit); $('profit').classList.toggle('neg',profit<0);
   $('revenue').textContent=rub(revenue);
   $('total').textContent=rub(total);
   $('perPerson').textContent=rub(perPerson);
@@ -308,19 +383,49 @@ function calc(){
   const margin=price-perPerson;
   $('breakeven').textContent=margin>0?`от ${Math.max(1,Math.ceil((perPerson*escorts+driversCost+group)/margin))} оплачивающих`:'не выходит';
   $('needPrice').textContent=rub(Math.ceil(((total+num(s.goal))/payers)/100)*100);
+  renderMix({payers, escorts, hotel, meals, per, group, perPerson, driversCost, total, price, profit}); dockState();
   try{localStorage.setItem('tourcalc_state3',JSON.stringify({state,current}))}catch(e){}
   scheduleCloud();
+}
+// where the price of one paying person goes; each part keeps its colour even when others are zero
+const SEGS=[['hotel','Проживание'],['meals','Питание'],['per','Билеты и прочее'],['escorts','Сопровождающие и водители'],['group','На всю группу'],['profit','Прибыль']];
+function dockState(){ $('dock').classList.toggle('away',resultSeen||typing()); }
+function renderMix(t){
+  const costPer=t.payers>0?t.total/t.payers:NaN;
+  $('dockProfit').textContent=rub(t.profit); $('dockProfit').classList.toggle('neg',t.profit<0);
+  $('dockPrice').textContent=rub(t.price); $('dockCost').textContent=rub(costPer);
+  if(!(t.payers>0)){ $('mix').hidden=true; $('dockBar').innerHTML=''; return; }
+  $('mix').hidden=false;
+  const v={hotel:t.hotel, meals:t.meals, per:t.per, escorts:(t.perPerson*t.escorts+t.driversCost)/t.payers, group:t.group/t.payers, profit:Math.max(0,t.price-costPer)};
+  const loss=t.price<costPer, base=Math.max(t.price,costPer)||1;
+  const segs=SEGS.map(([k,label],i)=>({k,label,val:v[k],c:`var(--s${i+1})`})).filter(x=>x.val>=1);
+  const pct=x=>Math.round(x/base*100)+'%';
+  let tick='';
+  if(loss){ // the price ends inside the cost bar: mark that point
+    let acc=0,k=0; for(const x of segs){ if(acc+x.val<=t.price){acc+=x.val;k++;} else break; }
+    tick=`<span class="tick" style="left:calc((100% - ${(segs.length-1)*2}px) * ${t.price/costPer} + ${k*2}px)" title="Цена ${rub(t.price)}"></span>`;
+  }
+  $('mixBar').innerHTML=segs.map(x=>`<i data-seg="${x.k}" style="--c:${x.c};flex:${x.val} 1 0" title="${x.label}: ${rub(x.val)} (${pct(x.val)})"></i>`).join('')+tick;
+  $('mixBar').setAttribute('aria-label',segs.map(x=>`${x.label} ${rub(x.val)}`).join(', '));
+  $('dockBar').innerHTML=segs.map(x=>`<i style="--c:${x.c};flex:${x.val} 1 0"></i>`).join('');
+  $('mixTitle').textContent=loss?'Себестоимость выше цены':'Из чего складывается цена';
+  $('mixTotal').textContent=rub(loss?costPer:t.price);
+  $('mixLegend').innerHTML=segs.map(x=>`<li data-seg="${x.k}"${x.k==='profit'?' class="strong"':''}><span class="sw" style="--c:${x.c}"></span><span class="l">${x.label}</span><span class="v">${rub(x.val)}</span><span class="p">${pct(x.val)}</span></li>`).join('')
+    +(loss?`<li><span class="sw tk"></span><span class="l">Цена</span><span class="v">${rub(t.price)}</span><span class="p"></span></li><li class="loss"><span aria-hidden="true">⚠</span><span class="l">Убыток с человека</span><span class="v">${rub(t.price-costPer)}</span><span class="p"></span></li>`:'');
 }
 function chipLabel(name){const t=totals(custom[name]);return `${esc(name)}<span class="pp">${Math.round(t.price).toLocaleString('ru-RU')} ₽ · прибыль ${short(t.profit)}</span>`;}
 function updateChip(){const b=document.querySelector(`#presets .chip.on button`); if(b&&current) b.innerHTML=chipLabel(current);}
 function renderPresets(){
-  const box=$('presets'); box.innerHTML='';
+  const box=$('presets'), add=$('addChip'); box.innerHTML='';
   Object.keys(custom).forEach(name=>{
     const chip=document.createElement('span'); chip.className='chip'+(name===current?' on':'');
     const b=document.createElement('button'); b.type='button'; b.innerHTML=chipLabel(name);
     b.addEventListener('click',()=>{current=name;state=ensureOn(clone(custom[name]));fill();renderPresets();calc();});
     chip.appendChild(b); box.appendChild(chip);
   });
+  box.appendChild(add);
+  const on=box.querySelector('.chip.on');
+  if(on&&box.scrollWidth>box.clientWidth){const b=box.getBoundingClientRect(),r=on.getBoundingClientRect(); if(r.left<b.left||r.right>b.right) box.scrollLeft+=r.left-b.left-16;}
   const has=current&&custom[current];
   $('cityStatus').innerHTML=has?`Открыт город <strong>${esc(current)}</strong> · изменения сохраняются сами`:(Object.keys(custom).length?'Черновик — выберите город или нажмите «+», чтобы сохранить эти цифры как новый город':'Черновик — нажмите «+», чтобы сохранить эти цифры как город');
   $('cityActions').hidden=!has; $('cityConfirm').hidden=true; $('cityRename').hidden=true;
@@ -350,7 +455,7 @@ $('f').addEventListener('click',e=>{
   if(st){
     const id=st.dataset.for, d=+st.dataset.step;
     if(id==='nights'){ setNights(state.nightPrices.length+d); $('nights').value=state.nightPrices.length; }
-    else { const min=id==='payers'?1:0; state[id]=Math.max(min,num(state[id])+d); $(id).value=state[id]; }
+    else { const min=id==='payers'?1:0; state[id]=Math.max(min,num(state[id])+d); $(id).value=fmt(state[id]); }
     calc(); commit(); return;
   }
   const it=e.target.closest('[data-itog]');
@@ -364,11 +469,11 @@ $('addPer').addEventListener('click',()=>{state.per.push({name:'Новый ра�
 $('addGroup').addEventListener('click',()=>{state.group.push({name:'Новый расход',val:0,on:true});renderList('group');calc();commit();const i=state.group.length-1;$('groupn'+i).focus();$('groupn'+i).select();});
 $('goal').addEventListener('input',e=>{state.goal=num(e.target.value);calc();commit();});
 $('addCity').addEventListener('click',()=>{
-  $('newcity').hidden=false;$('addCity').hidden=true;$('cityName').value='';
+  $('newcity').hidden=false;$('addChip').hidden=true;$('cityName').value='';
   $('newHint').textContent=(current&&custom[current])?'Новый город начнётся со стандартных цифр':'Сохраним цифры, которые сейчас введены';
   $('cityName').focus();
 });
-$('cancelCity').addEventListener('click',()=>{$('newcity').hidden=true;$('addCity').hidden=false;});
+$('cancelCity').addEventListener('click',()=>{$('newcity').hidden=true;$('addChip').hidden=false;});
 function uniq(name){let n=name,i=2;while(custom[n]){n=`${name} (${i++})`;}return n;}
 function saveCity(){
   let name=$('cityName').value.trim(); if(!name){$('cityName').focus();return;}
@@ -376,7 +481,7 @@ function saveCity(){
   const fromDraft=!(current&&custom[current]);
   state=ensureOn(clone(fromDraft?state:DEFAULT));
   custom[name]=clone(state); current=name; saveCustom();
-  $('newcity').hidden=true; $('addCity').hidden=false; fill(); renderPresets(); calc();
+  $('newcity').hidden=true; $('addChip').hidden=false; fill(); renderPresets(); calc();
 }
 $('saveCity').addEventListener('click',saveCity);
 $('renameCity').addEventListener('click',()=>{$('cityActions').hidden=true;$('cityRename').hidden=false;$('renameInput').value=current;$('renameInput').focus();});
@@ -456,6 +561,18 @@ let editedBeforeLoad=false;
 document.addEventListener('input',()=>{ if(!cloudReady) editedBeforeLoad=true; },true);
 document.addEventListener('click',e=>{ if(!cloudReady&&e.target.closest('button')) editedBeforeLoad=true; },true);
 setTimeout(()=>connectCloud(0),0);
+// numbers get their spaces back when you leave the field
+document.addEventListener('focusout',e=>{const t=e.target; if(t instanceof HTMLInputElement&&t.classList.contains('num')&&!t.disabled) t.value=t.id==='nights'?state.nightPrices.length:fmt(num(t.value));});
+// hovering a part of the bar or a legend row highlights the pair
+$('mix').addEventListener('pointerover',e=>{const m=$('mix'), el=e.target.closest('[data-seg]'); if(!el){m.classList.remove('hl');return;}
+  m.classList.add('hl'); m.querySelectorAll('[data-seg]').forEach(x=>x.classList.toggle('on',x.dataset.seg===el.dataset.seg));});
+$('mix').addEventListener('pointerleave',()=>$('mix').classList.remove('hl'));
+// phone dock: hidden while the result panel is on screen or the keyboard is likely open
+const dock=$('dock');
+dock.addEventListener('click',()=>document.querySelector('.result').scrollIntoView({behavior:'smooth',block:'start'}));
+if('IntersectionObserver' in window) new IntersectionObserver(es=>{resultSeen=es[0].isIntersecting; dockState();},{rootMargin:'0px 0px -60px 0px'}).observe(document.querySelector('.result'));
+document.addEventListener('focusin',dockState);
+document.addEventListener('focusout',()=>setTimeout(dockState,0));
 // start
 let saved=null; try{saved=JSON.parse(localStorage.getItem('tourcalc_state3')||'null')}catch(e){}
 if(saved&&saved.state&&Array.isArray(saved.state.nightPrices)){state=ensureOn(saved.state);current=saved.current&&custom[saved.current]?saved.current:null; if(current) state=ensureOn(clone(custom[current]));}
