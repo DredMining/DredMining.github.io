@@ -100,7 +100,7 @@ input:disabled{opacity:.5}
 .row.item{grid-template-columns:26px minmax(0,1fr) 72px 26px;gap:6px}
 #groupList .row.item{grid-template-columns:26px minmax(0,1fr) 100px 26px}
 .row.item.off .iname{text-decoration:line-through;color:var(--muted)}
-.iname{min-width:0;overflow-wrap:anywhere;cursor:text;padding:3px 0}
+button.iname{min-width:0;overflow-wrap:anywhere;cursor:text;padding:3px 0;background:none;border:0;font:inherit;color:inherit;text-align:left}
 .iname i{color:var(--muted)}
 /* item names read as labels; the box shows up when you touch them */
 .row.item input.name{background:transparent;border-color:transparent;padding-inline:4px}
@@ -278,11 +278,12 @@ function renderNights0(){
   box.innerHTML=state.nightPrices.map((v,i)=>`<div class="row"><label for="night${i}">${i+1}-я ночь</label><input id="night${i}" data-night="${i}" class="num" type="text" inputmode="numeric" value="${fmt(v)}"></div>`).join('');
 }
 function renderList(kind){keepFocus(()=>renderList0(kind));}
+const nameHtml=(kind,i,it)=>`<button type="button" class="iname" data-ename="${kind}" data-i="${i}" title="Нажмите, чтобы переименовать">${it.name.trim()?esc(it.name):'<i>без названия</i>'}</button>`;
 function renderList0(kind){
   const box=$(kind==='per'?'perList':'groupList');
   box.innerHTML=state[kind].map((it,i)=>`<div class="row item${it.on===false?' off':''}" style="margin-bottom:8px">
     <button type="button" class="tog${it.on===false?' off':''}" data-itog="${kind}" data-i="${i}" aria-label="Учитывать: да или нет"></button>
-    <span class="iname" data-ename="${kind}" data-i="${i}" title="Нажмите, чтобы переименовать">${it.name.trim()?esc(it.name):'<i>без названия</i>'}</span>
+    ${nameHtml(kind,i,it)}
     <input id="${kind}v${i}" data-kind="${kind}" data-i="${i}" data-f="val" class="num" type="text" inputmode="numeric" value="${it.on===false?'':fmt(it.val)}" placeholder="${it.on===false?'—':''}" ${it.on===false?'disabled':''} aria-label="Сумма">
     <button type="button" class="del" data-del="${kind}" data-i="${i}" aria-label="Удалить">×</button></div>`).join('');
 }
@@ -292,7 +293,7 @@ function startEdit(kind,i){
   const inp=document.createElement('input'); inp.type='text'; inp.className='name'; inp.id=kind+'n'+i;
   Object.assign(inp.dataset,{kind,i,f:'name'}); inp.value=state[kind][i].name; inp.setAttribute('aria-label','Название');
   sp.replaceWith(inp); inp.focus(); inp.select();
-  inp.addEventListener('blur',()=>{ if(inp.isConnected) renderList(kind); },{once:true});
+  inp.addEventListener('blur',()=>{ if(!inp.isConnected) return; const t=document.createElement('template'); t.innerHTML=nameHtml(kind,i,state[kind][i]); inp.replaceWith(t.content.firstChild); },{once:true});
   inp.addEventListener('keydown',ev=>{ if(ev.key==='Enter') inp.blur(); });
 }
 function renderMeals(){
@@ -333,7 +334,7 @@ function commit(){ if(current&&custom[current]){ custom[current]=clone(state); s
 function calc(){
   const s=state, {payers, escorts, hotel, mealsN, meals, per, group, perPerson, driversHotel, driversMeals, driversCost, total, price, revenue, profit}=totals(s);
   $('hotelSum').innerHTML=`${s.nightPrices.length} ноч. · <b>${rub(hotel)}</b> с человека`+(num(s.drivers)?` · водители <b>${rub(driversHotel)}</b>`:'');
-  MEALS.forEach(k=>{const n=num(s[k+'N']), pr=num(s[k+'P']); $('h'+k).textContent=s.on[k]?`${fmt(n)} × ${rub(pr)} = ${rub(n*pr)}`:'';});
+  MEALS.forEach(k=>{const n=num(s[k+'N']), pr=num(s[k+'P']); const rb=x=>rub(x).replace(' ₽','\u00a0₽'); $('h'+k).textContent=s.on[k]?`${fmt(n)} × ${rb(pr)} = ${rb(n*pr)}`:'';});
   $('mealsSum').innerHTML=`${mealsN} приёмов пищи · <b>${rub(meals)}</b> с человека`+(driversMeals?` · водители <b>${rub(driversMeals)}</b>`:'');
   $('perSum').innerHTML=`Итого <b>${rub(per)}</b> с человека`;
   $('groupSum').innerHTML=`Итого <b>${rub(group)}</b> на группу`;
@@ -436,7 +437,7 @@ $('cityName').addEventListener('keydown',e=>{if(e.key==='Enter')saveCity();if(e.
 
 document.addEventListener('focusin',e=>{
   const t=e.target; if(!(t instanceof HTMLInputElement)||t.disabled) return;
-  const sel=()=>{try{t.select();t.setSelectionRange(0,t.value.length)}catch(_){}};
+  const sel=()=>{ if(document.activeElement!==t) return; try{t.select();t.setSelectionRange(0,t.value.length)}catch(_){}};
   setTimeout(sel,0); setTimeout(sel,80);
 });
 document.addEventListener('mouseup',e=>{if(e.target instanceof HTMLInputElement&&e.target===document.activeElement)e.preventDefault();});
