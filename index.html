@@ -75,12 +75,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 /* columns, not a grid: cards stack without empty holes between rows */
 .form{columns:2 270px;column-gap:12px}
 .form>fieldset{break-inside:avoid;margin-bottom:12px}
+.notes{grid-column:1}
 fieldset{margin:0;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:10px 12px 12px;display:flex;flex-direction:column;gap:7px;min-width:0}
 /* section titles are small solid blocks sitting on the card's top edge */
 legend{font-family:var(--display);font-weight:500;text-transform:uppercase;letter-spacing:.8px;font-size:12px;line-height:1.2;color:var(--tag-fg);background:var(--tag);padding:4px 10px;border-radius:6px}
 fieldset.pricebox legend{background:var(--accent);color:var(--accent-ink)}
-.row{display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:8px;align-items:center}
-.row.two{grid-template-columns:minmax(0,1fr) 26px 100px 76px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 108px;gap:8px;align-items:center}
+.row.meal{grid-template-columns:24px minmax(0,1fr) 100px 72px;gap:6px}
+@media (max-width:359px){.row.meal>label{grid-column:2/-1}.row.meal>.stepper{grid-column:3}.row.meal>input{grid-column:4}}
 .row.st{grid-template-columns:minmax(0,1fr) 108px}
 .row.tg{grid-template-columns:minmax(0,1fr) auto}
 .row.dim label{color:var(--muted)}
@@ -97,19 +99,17 @@ fieldset.pricebox legend{background:var(--accent);color:var(--accent-ink)}
 input:disabled{opacity:.5}
 .row.item{grid-template-columns:26px minmax(0,1fr) 72px 26px;gap:6px}
 #groupList .row.item{grid-template-columns:26px minmax(0,1fr) 100px 26px}
-.row.item.off .name{text-decoration:line-through;color:var(--muted)}
+.row.item.off .iname{text-decoration:line-through;color:var(--muted)}
+.iname{min-width:0;overflow-wrap:anywhere;cursor:text;padding:3px 0}
+.iname i{color:var(--muted)}
 /* item names read as labels; the box shows up when you touch them */
 .row.item input.name{background:transparent;border-color:transparent;padding-inline:4px}
 .row.item input.name:hover,.row.item input.name:focus{background:var(--bg);border-color:var(--line)}
-.row.item input.name:not(:focus){text-overflow:ellipsis}
 .row label{min-width:0}
 .hint{font-size:11px;color:var(--muted);display:block}
 input{width:100%;font:500 16px var(--body);font-variant-numeric:tabular-nums;text-align:right;padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--fg)}
 input.name{text-align:left}
-.head{display:grid;grid-template-columns:minmax(0,1fr) 26px 100px 76px;gap:8px;font-size:11px;color:var(--muted);text-align:center}
-.head span:first-child{text-align:left}
-.nights{display:flex;flex-direction:column;gap:4px;padding:6px;border-radius:8px;background:var(--soft)}
-.nights .row{grid-template-columns:minmax(0,1fr) 100px}
+.nights{display:flex;flex-direction:column;gap:7px}
 .sub{font-size:12px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;border-top:1px solid var(--line);padding-top:6px}
 .sub b{color:var(--fg);font-weight:600}
 fieldset.pricebox{border-color:var(--accent)}
@@ -191,10 +191,9 @@ fieldset.pricebox{border-color:var(--accent)}
 
       <fieldset>
         <legend>Питание</legend>
-        <div class="head"><span></span><span>есть</span><span>раз</span><span>₽ за раз</span></div>
-        <div class="row two" id="rowb"><label for="bN">Завтрак</label><button type="button" class="tog" data-tog="b" aria-label="Завтрак: есть или нет"></button><div class="stepper"><button type="button" data-step="-1" data-for="bN" aria-label="Минус">−</button><input id="bN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="bN" aria-label="Плюс">+</button></div><input id="bP" class="num" type="text" inputmode="numeric" aria-label="Цена завтрака"></div><div class="row two" id="rowl"><label for="lN">Обед</label><button type="button" class="tog" data-tog="l" aria-label="Обед: есть или нет"></button><div class="stepper"><button type="button" data-step="-1" data-for="lN" aria-label="Минус">−</button><input id="lN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="lN" aria-label="Плюс">+</button></div><input id="lP" class="num" type="text" inputmode="numeric" aria-label="Цена обеда"></div><div class="row two" id="rowd"><label for="dN">Ужин</label><button type="button" class="tog" data-tog="d" aria-label="Ужин: есть или нет"></button><div class="stepper"><button type="button" data-step="-1" data-for="dN" aria-label="Минус">−</button><input id="dN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="dN" aria-label="Плюс">+</button></div><input id="dP" class="num" type="text" inputmode="numeric" aria-label="Цена ужина"></div>
-        <div class="hint" style="margin-top:4px">Дополнительно</div>
-        <div class="row two" id="rowm"><label for="mN">Обед в горах</label><button type="button" class="tog" data-tog="m" aria-label="Обед в горах: есть или нет"></button><div class="stepper"><button type="button" data-step="-1" data-for="mN" aria-label="Минус">−</button><input id="mN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="mN" aria-label="Плюс">+</button></div><input id="mP" class="num" type="text" inputmode="numeric" aria-label="Цена обеда в горах"></div><div class="row two" id="rowr"><label for="rN">Сухой паёк</label><button type="button" class="tog" data-tog="r" aria-label="Сухой паёк: есть или нет"></button><div class="stepper"><button type="button" data-step="-1" data-for="rN" aria-label="Минус">−</button><input id="rN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="rN" aria-label="Плюс">+</button></div><input id="rP" class="num" type="text" inputmode="numeric" aria-label="Цена сухого пайка"></div>
+        <div class="row meal" id="rowb"><button type="button" class="tog" data-tog="b" aria-label="Завтрак: есть или нет"></button><label for="bN">Завтрак<span class="hint" id="hb"></span></label><div class="stepper"><button type="button" data-step="-1" data-for="bN" aria-label="Минус">−</button><input id="bN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="bN" aria-label="Плюс">+</button></div><input id="bP" class="num" type="text" inputmode="numeric" aria-label="Цена завтрака"></div><div class="row meal" id="rowl"><button type="button" class="tog" data-tog="l" aria-label="Обед: есть или нет"></button><label for="lN">Обед<span class="hint" id="hl"></span></label><div class="stepper"><button type="button" data-step="-1" data-for="lN" aria-label="Минус">−</button><input id="lN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="lN" aria-label="Плюс">+</button></div><input id="lP" class="num" type="text" inputmode="numeric" aria-label="Цена обеда"></div><div class="row meal" id="rowd"><button type="button" class="tog" data-tog="d" aria-label="Ужин: есть или нет"></button><label for="dN">Ужин<span class="hint" id="hd"></span></label><div class="stepper"><button type="button" data-step="-1" data-for="dN" aria-label="Минус">−</button><input id="dN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="dN" aria-label="Плюс">+</button></div><input id="dP" class="num" type="text" inputmode="numeric" aria-label="Цена ужина"></div>
+        <div class="hint" style="margin-top:2px">Дополнительно</div>
+        <div class="row meal" id="rowm"><button type="button" class="tog" data-tog="m" aria-label="Обед в горах: есть или нет"></button><label for="mN">Обед в горах<span class="hint" id="hm"></span></label><div class="stepper"><button type="button" data-step="-1" data-for="mN" aria-label="Минус">−</button><input id="mN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="mN" aria-label="Плюс">+</button></div><input id="mP" class="num" type="text" inputmode="numeric" aria-label="Цена обеда в горах"></div><div class="row meal" id="rowr"><button type="button" class="tog" data-tog="r" aria-label="Сухой паёк: есть или нет"></button><label for="rN">Сухой паёк<span class="hint" id="hr"></span></label><div class="stepper"><button type="button" data-step="-1" data-for="rN" aria-label="Минус">−</button><input id="rN" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="rN" aria-label="Плюс">+</button></div><input id="rP" class="num" type="text" inputmode="numeric" aria-label="Цена сухого пайка"></div>
         
         
         
@@ -221,11 +220,6 @@ fieldset.pricebox{border-color:var(--accent)}
         <div class="row"><label for="price">Цена с человека, ₽<span class="hint">без ж/д билетов</span></label><input id="price" class="num" type="text" inputmode="numeric"></div>
       </fieldset>
 
-      <fieldset>
-        <legend>Заметки</legend>
-        <div class="row"><label for="tripDate">Дата выезда</label><input id="tripDate" class="name" type="text" placeholder="например, 28.10"></div>
-        <textarea id="tripNote" rows="3" placeholder="Учитель, телефон, предоплата…" aria-label="Заметка"></textarea>
-      </fieldset>
     </div>
 
     <aside class="result" aria-live="polite">
@@ -245,6 +239,11 @@ fieldset.pricebox{border-color:var(--accent)}
         <div>Нужная цена: <strong id="needPrice">—</strong></div>
       </div>
     </aside>
+      <fieldset class="notes" id="notesBox">
+        <legend>Заметки</legend>
+        <div class="row"><label for="tripDate">Дата выезда</label><input id="tripDate" class="name" type="text" placeholder="например, 28.10"></div>
+        <textarea id="tripNote" rows="3" placeholder="Учитель, телефон, предоплата…" aria-label="Заметка"></textarea>
+      </fieldset>
   </div>
 
 </div>
@@ -283,9 +282,18 @@ function renderList0(kind){
   const box=$(kind==='per'?'perList':'groupList');
   box.innerHTML=state[kind].map((it,i)=>`<div class="row item${it.on===false?' off':''}" style="margin-bottom:8px">
     <button type="button" class="tog${it.on===false?' off':''}" data-itog="${kind}" data-i="${i}" aria-label="Учитывать: да или нет"></button>
-    <input class="name" id="${kind}n${i}" data-kind="${kind}" data-i="${i}" data-f="name" type="text" value="${esc(it.name)}" aria-label="Название">
+    <span class="iname" data-ename="${kind}" data-i="${i}" title="Нажмите, чтобы переименовать">${it.name.trim()?esc(it.name):'<i>без названия</i>'}</span>
     <input id="${kind}v${i}" data-kind="${kind}" data-i="${i}" data-f="val" class="num" type="text" inputmode="numeric" value="${it.on===false?'':fmt(it.val)}" placeholder="${it.on===false?'—':''}" ${it.on===false?'disabled':''} aria-label="Сумма">
     <button type="button" class="del" data-del="${kind}" data-i="${i}" aria-label="Удалить">×</button></div>`).join('');
+}
+// renaming: the text turns into a field while you type, then back into text
+function startEdit(kind,i){
+  const sp=document.querySelector(`[data-ename="${kind}"][data-i="${i}"]`); if(!sp) return;
+  const inp=document.createElement('input'); inp.type='text'; inp.className='name'; inp.id=kind+'n'+i;
+  Object.assign(inp.dataset,{kind,i,f:'name'}); inp.value=state[kind][i].name; inp.setAttribute('aria-label','Название');
+  sp.replaceWith(inp); inp.focus(); inp.select();
+  inp.addEventListener('blur',()=>{ if(inp.isConnected) renderList(kind); },{once:true});
+  inp.addEventListener('keydown',ev=>{ if(ev.key==='Enter') inp.blur(); });
 }
 function renderMeals(){
   MEALS.forEach(k=>{
@@ -325,6 +333,7 @@ function commit(){ if(current&&custom[current]){ custom[current]=clone(state); s
 function calc(){
   const s=state, {payers, escorts, hotel, mealsN, meals, per, group, perPerson, driversHotel, driversMeals, driversCost, total, price, revenue, profit}=totals(s);
   $('hotelSum').innerHTML=`${s.nightPrices.length} ноч. · <b>${rub(hotel)}</b> с человека`+(num(s.drivers)?` · водители <b>${rub(driversHotel)}</b>`:'');
+  MEALS.forEach(k=>{const n=num(s[k+'N']), pr=num(s[k+'P']); $('h'+k).textContent=s.on[k]?`${fmt(n)} × ${rub(pr)} = ${rub(n*pr)}`:'';});
   $('mealsSum').innerHTML=`${mealsN} приёмов пищи · <b>${rub(meals)}</b> с человека`+(driversMeals?` · водители <b>${rub(driversMeals)}</b>`:'');
   $('perSum').innerHTML=`Итого <b>${rub(per)}</b> с человека`;
   $('groupSum').innerHTML=`Итого <b>${rub(group)}</b> на группу`;
@@ -359,7 +368,7 @@ function renderPresets(){
 function saveCustom(){try{localStorage.setItem('tourcalc_custom',JSON.stringify(custom))}catch(e){} scheduleCloud();}
 
 // events
-$('f').addEventListener('input',e=>{
+function onInput(e){
   const t=e.target;
   if(t.id==='nights'){ setNights(parseInt(t.value)||0); if(t.value.trim()!==''&&t.value.trim()!==String(state.nightPrices.length)) t.value=state.nightPrices.length; } else if(t.dataset.night!==undefined){ state.nightPrices[+t.dataset.night]=num(t.value); }
   else if(t.dataset.kind){ const it=state[t.dataset.kind][+t.dataset.i]; it[t.dataset.f]=t.dataset.f==='val'?num(t.value):t.value; }
@@ -367,7 +376,8 @@ $('f').addEventListener('input',e=>{
   else if(t.id==='tripDate'){ state.date=t.value; }
   else if(t.id==='tripNote'){ state.note=t.value; }
   calc(); commit();
-});
+}
+$('f').addEventListener('input',onInput); $('notesBox').addEventListener('input',onInput);
 // nightMem keeps prices of removed nights, so clearing the field or stepping down and back up does not lose them
 let nightMem=[];
 function setNights(n){
@@ -384,6 +394,7 @@ $('f').addEventListener('click',e=>{
     else { const min=id==='payers'?1:0; state[id]=Math.max(min,num(state[id])+d); $(id).value=fmt(state[id]); }
     calc(); commit(); return;
   }
+  const en=e.target.closest('[data-ename]'); if(en){ startEdit(en.dataset.ename,+en.dataset.i); return; }
   const it=e.target.closest('[data-itog]');
   if(it){ const o=state[it.dataset.itog][+it.dataset.i]; o.on=o.on===false; renderList(it.dataset.itog); calc(); commit(); return; }
   if(e.target.closest('[data-dtog]')){ state.drvMeals=!state.drvMeals; renderDrivers(); calc(); commit(); return; }
@@ -392,8 +403,8 @@ $('f').addEventListener('click',e=>{
   const d=e.target.closest('[data-del]'); if(!d) return;
   state[d.dataset.del].splice(+d.dataset.i,1); renderList(d.dataset.del); calc(); commit();
 });
-$('addPer').addEventListener('click',()=>{state.per.push({name:'Новый расход',val:0,on:true});renderList('per');calc();commit();const i=state.per.length-1;$('pern'+i).focus();$('pern'+i).select();});
-$('addGroup').addEventListener('click',()=>{state.group.push({name:'Новый расход',val:0,on:true});renderList('group');calc();commit();const i=state.group.length-1;$('groupn'+i).focus();$('groupn'+i).select();});
+$('addPer').addEventListener('click',()=>{state.per.push({name:'Новый расход',val:0,on:true});renderList('per');calc();commit();startEdit('per',state.per.length-1);});
+$('addGroup').addEventListener('click',()=>{state.group.push({name:'Новый расход',val:0,on:true});renderList('group');calc();commit();startEdit('group',state.group.length-1);});
 $('goal').addEventListener('input',e=>{state.goal=num(e.target.value);calc();commit();});
 $('addCity').addEventListener('click',()=>{
   $('newcity').hidden=false;$('addChip').hidden=true;$('cityName').value='';
