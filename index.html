@@ -103,6 +103,7 @@ input:disabled{opacity:.5}
 /* item names read as labels; the box shows up when you touch them */
 .row.item input.name{background:transparent;border-color:transparent;padding-inline:4px}
 .row.item input.name:hover,.row.item input.name:focus{background:var(--bg);border-color:var(--line)}
+.row.item input.name:not(:focus){text-overflow:ellipsis}
 .row label{min-width:0}
 .hint{font-size:12px;color:var(--muted);display:block}
 input{width:100%;font:500 16px var(--body);font-variant-numeric:tabular-nums;text-align:right;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
@@ -117,7 +118,7 @@ fieldset.pricebox{border-color:var(--accent)}
 #price{font-size:20px!important;font-weight:600}
 .del{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
 .addrow{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px}
-.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--hero);color:var(--hero-fg);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);scroll-margin-top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--hero);color:var(--hero-fg);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .result h2{font-family:var(--display);font-weight:500;text-transform:uppercase;letter-spacing:1px;font-size:15px;color:var(--hero-muted);margin:0}
 .big{font-family:var(--display);font-weight:600;font-size:44px;line-height:1}
 .big.neg{color:#FF8A94}
@@ -125,6 +126,7 @@ fieldset.pricebox{border-color:var(--accent)}
 .kv div{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
 .kv span:first-child{color:var(--hero-muted)}
 .kv span:last-child{white-space:nowrap;text-align:right}
+#breakeven{white-space:normal}
 /* "what the price is made of": one stacked bar per paying person + legend with the numbers */
 .result{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300}
 .mix{display:flex;flex-direction:column;gap:10px;border-top:1px solid rgba(255,255,255,.15);padding-top:12px}
@@ -159,6 +161,8 @@ fieldset.pricebox{border-color:var(--accent)}
   .dock .v2{font-weight:500;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}
   .dock .go{font-size:18px;color:var(--hero-muted);align-self:center}
 }
+@media (max-width:359px){.dock{grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:8px;padding-inline:10px}.dock .go{display:none}.dock .v{font-size:20px}.dock .v2{font-size:13px}}
+@media (min-width:881px){.result{max-height:calc(100vh - 24px);overflow-y:auto}}
 .dock{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300}
 .pill{display:inline-block;font-weight:600;font-size:13px;padding:3px 10px;border-radius:999px}
 .pill.good{background:var(--good);color:#fff}.pill.bad{background:var(--bad);color:#fff}
@@ -308,12 +312,12 @@ const $=id=>document.getElementById(id);
 const num=x=>Math.max(0,parseFloat(String(x).replace(/\s/g,'').replace(',','.'))||0);
 const MEALS=['b','l','m','d','r'];
 const ensureOn=st=>{st.on=Object.assign({b:true,l:true,m:true,d:true,r:true},st.on||{}); if(st.drivers===undefined) st.drivers=2; return st;};
-const rub=n=>isFinite(n)?Math.round(n).toLocaleString('ru-RU').replace('-','−')+' ₽':'—';
+const rub=n=>isFinite(n)?(Math.round(n)||0).toLocaleString('ru-RU').replace('-','−')+' ₽':'—';
 // numbers in fields are shown as 165 000, typing still accepts 165000
 const fmt=n=>(Number(n)||0).toLocaleString('ru-RU',{maximumFractionDigits:2});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-let state, current=null, custom={};
+let state, current=null, custom={}, resultSeen=false;
 try{custom=JSON.parse(localStorage.getItem('tourcalc_custom')||'{}')||{}}catch(e){custom={}}
 const allPresets=()=>Object.assign({},BUILTIN,custom);
 const clone=o=>JSON.parse(JSON.stringify(o));
@@ -379,12 +383,13 @@ function calc(){
   const margin=price-perPerson;
   $('breakeven').textContent=margin>0?`от ${Math.max(1,Math.ceil((perPerson*escorts+driversCost+group)/margin))} оплачивающих`:'не выходит';
   $('needPrice').textContent=rub(Math.ceil(((total+num(s.goal))/payers)/100)*100);
-  renderMix({payers, escorts, hotel, meals, per, group, perPerson, driversCost, total, price, profit});
+  renderMix({payers, escorts, hotel, meals, per, group, perPerson, driversCost, total, price, profit}); dockState();
   try{localStorage.setItem('tourcalc_state3',JSON.stringify({state,current}))}catch(e){}
   scheduleCloud();
 }
 // where the price of one paying person goes; each part keeps its colour even when others are zero
 const SEGS=[['hotel','Проживание'],['meals','Питание'],['per','Билеты и прочее'],['escorts','Сопровождающие и водители'],['group','На всю группу'],['profit','Прибыль']];
+function dockState(){ $('dock').classList.toggle('away',resultSeen||typing()); }
 function renderMix(t){
   const costPer=t.payers>0?t.total/t.payers:NaN;
   $('dockProfit').textContent=rub(t.profit); $('dockProfit').classList.toggle('neg',t.profit<0);
@@ -419,6 +424,8 @@ function renderPresets(){
     chip.appendChild(b); box.appendChild(chip);
   });
   box.appendChild(add);
+  const on=box.querySelector('.chip.on');
+  if(on&&box.scrollWidth>box.clientWidth){const b=box.getBoundingClientRect(),r=on.getBoundingClientRect(); if(r.left<b.left||r.right>b.right) box.scrollLeft+=r.left-b.left-16;}
   const has=current&&custom[current];
   $('cityStatus').innerHTML=has?`Открыт город <strong>${esc(current)}</strong> · изменения сохраняются сами`:(Object.keys(custom).length?'Черновик — выберите город или нажмите «+», чтобы сохранить эти цифры как новый город':'Черновик — нажмите «+», чтобы сохранить эти цифры как город');
   $('cityActions').hidden=!has; $('cityConfirm').hidden=true; $('cityRename').hidden=true;
@@ -561,12 +568,11 @@ $('mix').addEventListener('pointerover',e=>{const m=$('mix'), el=e.target.closes
   m.classList.add('hl'); m.querySelectorAll('[data-seg]').forEach(x=>x.classList.toggle('on',x.dataset.seg===el.dataset.seg));});
 $('mix').addEventListener('pointerleave',()=>$('mix').classList.remove('hl'));
 // phone dock: hidden while the result panel is on screen or the keyboard is likely open
-const dock=$('dock'); let resultSeen=false, typingNow=false;
-const dockState=()=>dock.classList.toggle('away',resultSeen||typingNow);
+const dock=$('dock');
 dock.addEventListener('click',()=>document.querySelector('.result').scrollIntoView({behavior:'smooth',block:'start'}));
 if('IntersectionObserver' in window) new IntersectionObserver(es=>{resultSeen=es[0].isIntersecting; dockState();},{rootMargin:'0px 0px -60px 0px'}).observe(document.querySelector('.result'));
-document.addEventListener('focusin',()=>{typingNow=typing(); dockState();});
-document.addEventListener('focusout',()=>setTimeout(()=>{typingNow=typing(); dockState();},0));
+document.addEventListener('focusin',dockState);
+document.addEventListener('focusout',()=>setTimeout(dockState,0));
 // start
 let saved=null; try{saved=JSON.parse(localStorage.getItem('tourcalc_state3')||'null')}catch(e){}
 if(saved&&saved.state&&Array.isArray(saved.state.nightPrices)){state=ensureOn(saved.state);current=saved.current&&custom[saved.current]?saved.current:null; if(current) state=ensureOn(clone(custom[current]));}
