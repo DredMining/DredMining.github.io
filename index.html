@@ -44,21 +44,18 @@ header h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,4vw,36
 header p{margin:4px 0 0;color:var(--muted)}
 .presets{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .chip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;background:var(--panel);overflow:hidden}
-.chip button{font:500 14px var(--body);padding:8px 14px;border:0;background:transparent;color:var(--fg);cursor:pointer}
+.chip button{font:500 13px var(--body);padding:6px 11px;border:0;background:transparent;color:var(--fg);cursor:pointer}
 .chip.on{background:var(--accent);border-color:var(--accent)}
 .chip.on button{color:var(--accent-ink)}
 .chip .x{padding:8px 10px 8px 2px;color:var(--muted)}
-.chip button .pp{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:1px}
+.chip button .pp{display:block;font-size:10.5px;font-weight:400;color:var(--muted);margin-top:1px}
 .chip.on button .pp{color:var(--accent-ink);opacity:.8}
 #presets{flex:1 1 100%;min-width:0}
-.chip{flex:none}
+.chip{flex:none;max-width:100%}
+.chip button{min-width:0;overflow-wrap:anywhere}
 .chip.add{border-style:dashed;background:transparent}
 .chip.add button{color:var(--muted);align-self:stretch}
 @media (max-width:880px){
-  /* phones: cities in one swipeable row instead of one per line */
-  #presets{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding:2px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  #presets::-webkit-scrollbar{display:none}
-  #presets .chip.add{order:-1}
   header p{font-size:14px}
 }
 .citybar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
@@ -86,6 +83,8 @@ legend{font-family:var(--display);font-weight:500;text-transform:uppercase;lette
 .row{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px;align-items:center}
 .row.two{grid-template-columns:minmax(0,1fr) 30px 112px 84px}
 .row.st{grid-template-columns:minmax(0,1fr) 124px}
+.row.tg{grid-template-columns:minmax(0,1fr) auto}
+.row.dim label{color:var(--muted)}
 .stepper{display:grid;grid-template-columns:34px minmax(0,1fr) 34px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg)}
 .stepper input{border:0;border-radius:0;text-align:center;padding:7px 2px;background:transparent}
 .stepper button{border:0;background:var(--soft);color:var(--fg);font:600 18px var(--body);cursor:pointer;touch-action:manipulation}
@@ -118,7 +117,7 @@ fieldset.pricebox{border-color:var(--accent)}
 #price{font-size:20px!important;font-weight:600}
 .del{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
 .addrow{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px}
-.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);scroll-margin-top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--hero);color:var(--hero-fg);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--hero);color:var(--hero-fg);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .result h2{font-family:var(--display);font-weight:500;text-transform:uppercase;letter-spacing:1px;font-size:15px;color:var(--hero-muted);margin:0}
 .big{font-family:var(--display);font-weight:600;font-size:44px;line-height:1}
 .big.neg{color:#FF8A94}
@@ -137,40 +136,21 @@ fieldset.pricebox{border-color:var(--accent)}
 .bar i:last-of-type{border-radius:0 4px 4px 0}
 .bar .tick{position:absolute;top:-5px;bottom:-5px;width:2px;margin-left:-1px;background:var(--hero-fg);border-radius:1px}
 .legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;font-size:14px}
-.legend li{display:grid;grid-template-columns:10px minmax(0,1fr) auto 38px;gap:8px;align-items:center;font-variant-numeric:tabular-nums;transition:opacity .15s}
+.legend li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:8px;align-items:center;font-variant-numeric:tabular-nums;transition:opacity .15s}
 .legend .sw{width:10px;height:10px;border-radius:2px;background:var(--c)}
 .legend .sw.tk{width:2px;height:14px;justify-self:center;border-radius:1px;background:var(--hero-fg)}
 .legend .l{color:var(--hero-muted);min-width:0}
 .legend .v{white-space:nowrap;text-align:right}
-.legend .p{color:var(--hero-muted);text-align:right}
 .legend li.strong .l,.legend li.strong .v{color:var(--hero-fg);font-weight:600}
 .legend li.loss .l,.legend li.loss .v{color:#FF8A94;font-weight:600}
 .mix.hl .bar i:not(.on),.mix.hl .legend li:not(.on){opacity:.35}
-/* phones: the result is far below, so a small bar at the bottom keeps profit in sight */
-.dock{display:none}
-@media (max-width:880px){
-  body{padding-bottom:96px}
-  .dock{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:10;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr) 20px;gap:12px;align-items:end;padding:12px 14px 10px;border:0;border-radius:14px;background:var(--hero);color:var(--hero-fg);box-shadow:0 8px 28px rgba(0,0,0,.28);font:inherit;text-align:left;cursor:pointer;overflow:hidden;transition:opacity .2s,transform .2s}
-  .dock.away{opacity:0;pointer-events:none;transform:translateY(16px)}
-  .dock .dockbar{position:absolute;left:0;right:0;top:0;height:4px;display:flex;gap:2px}
-  .dock .dockbar i{display:block;min-width:2px;background:var(--c)}
-  .dock .k{display:flex;flex-direction:column;gap:1px;min-width:0}
-  .dock .l{font-size:11px;color:var(--hero-muted);white-space:nowrap}
-  .dock .v{font-family:var(--display);font-weight:600;font-size:24px;line-height:1.05;white-space:nowrap}
-  .dock .v.neg{color:#FF8A94}
-  .dock .v2{font-weight:500;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}
-  .dock .go{font-size:18px;color:var(--hero-muted);align-self:center}
-}
-@media (max-width:359px){.dock{grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:8px;padding-inline:10px}.dock .go{display:none}.dock .v{font-size:20px}.dock .v2{font-size:13px}}
 @media (min-width:881px){.result{max-height:calc(100vh - 24px);overflow-y:auto}}
-.dock{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300}
 .pill{display:inline-block;font-weight:600;font-size:13px;padding:3px 10px;border-radius:999px}
 .pill.good{background:var(--good);color:#fff}.pill.bad{background:var(--bad);color:#fff}
 .target{display:flex;flex-direction:column;gap:8px;border-top:1px solid rgba(255,255,255,.15);padding-top:12px}
 .target .row{grid-template-columns:minmax(0,1fr) 120px}
 .target input{background:rgba(255,255,255,.08);color:var(--hero-fg);border-color:rgba(255,255,255,.2)}
 .target strong{font-family:var(--display);font-size:28px;color:var(--accent)}
-.note{font-size:12px;color:var(--muted)}
 .savest{font-size:13px;margin:6px 0 0;opacity:.85}.savest.warn{color:#ffb4a8;opacity:1}
 </style>
 
@@ -217,7 +197,8 @@ fieldset.pricebox{border-color:var(--accent)}
         <legend>Группа</legend>
         <div class="row st"><label for="payers">Оплачивающих<span class="hint">школьники и родители</span></label><div class="stepper"><button type="button" data-step="-1" data-for="payers" aria-label="Минус">−</button><input id="payers" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="payers" aria-label="Плюс">+</button></div></div>
         <div class="row st"><label for="escorts">Сопровождающих бесплатно<span class="hint">их расходы делятся на оплачивающих</span></label><div class="stepper"><button type="button" data-step="-1" data-for="escorts" aria-label="Минус">−</button><input id="escorts" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="escorts" aria-label="Плюс">+</button></div></div>
-        <div class="row st"><label for="drivers">Водители<span class="hint">платим только проживание, питание бесплатно</span></label><div class="stepper"><button type="button" data-step="-1" data-for="drivers" aria-label="Минус">−</button><input id="drivers" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="drivers" aria-label="Плюс">+</button></div></div>
+        <div class="row st"><label for="drivers">Водители<span class="hint">проживание оплачиваем всегда</span></label><div class="stepper"><button type="button" data-step="-1" data-for="drivers" aria-label="Минус">−</button><input id="drivers" class="num" type="text" inputmode="numeric"><button type="button" data-step="1" data-for="drivers" aria-label="Плюс">+</button></div></div>
+        <div class="row tg" id="rowdrv"><label for="drvMeals">Питание водителей<span class="hint" id="drvHint"></span></label><button type="button" class="tog" id="drvMeals" data-dtog aria-label="Питание водителей: платим или нет"></button></div>
       </fieldset>
 
       <fieldset>
@@ -290,18 +271,10 @@ fieldset.pricebox{border-color:var(--accent)}
     </aside>
   </div>
 
-  <p class="note">Расценки по умолчанию — из наших расчётов: гостиница 500 ₽, завтрак 250 ₽, обед 400 ₽, ужин 350 ₽, гид и фотограф по 250 ₽ с человека. Галочка у строки — она в расчёте; нажмите, чтобы убрать. Чтобы сохранить программу, нажмите «+ Новый город» и дайте ей название. Автобус и гид — ориентиры, уточняйте у перевозчика. Цифры и города хранятся на этом телефоне. Работает без интернета.</p>
 </div>
-<button type="button" class="dock" id="dock" aria-label="Показать итоги">
-  <span class="dockbar" id="dockBar" aria-hidden="true"></span>
-  <span class="k"><span class="l">Прибыль</span><span class="v" id="dockProfit">—</span></span>
-  <span class="k"><span class="l">Цена</span><span class="v2" id="dockPrice">—</span></span>
-  <span class="k"><span class="l">Себест. на чел.</span><span class="v2" id="dockCost">—</span></span>
-  <span class="go" aria-hidden="true">↓</span>
-</button>
 
 <script>
-const DEFAULT={payers:50,escorts:3,drivers:2,nightPrices:[1000,500],
+const DEFAULT={payers:50,escorts:3,drivers:2,drvMeals:false,nightPrices:[1000,500],
   bN:2,bP:250,lN:1,lP:400,dN:1,dP:350,mN:1,mP:400,rN:1,rP:250,on:{b:true,l:true,d:true,m:false,r:false},
   per:[{name:"«Грозный-Сити»",val:200,on:true},{name:"Гид",val:250,on:true},{name:"Фотограф",val:250,on:true},{name:"Премиальный фонд",val:0,on:true},{name:"Музей",val:200,on:false},{name:"Водопады",val:150,on:false}],
   group:[{name:"Автобус на месте",val:165000,on:true},{name:"Парковка",val:200,on:true},{name:"Гид в Осетии",val:20000,on:false}],
@@ -311,13 +284,13 @@ const SIMPLE=["payers","escorts","drivers","bN","bP","lN","lP","mN","mP","dN","d
 const $=id=>document.getElementById(id);
 const num=x=>Math.max(0,parseFloat(String(x).replace(/\s/g,'').replace(',','.'))||0);
 const MEALS=['b','l','m','d','r'];
-const ensureOn=st=>{st.on=Object.assign({b:true,l:true,m:true,d:true,r:true},st.on||{}); if(st.drivers===undefined) st.drivers=2; return st;};
+const ensureOn=st=>{st.on=Object.assign({b:true,l:true,m:true,d:true,r:true},st.on||{}); if(st.drivers===undefined) st.drivers=2; st.drvMeals=!!st.drvMeals; return st;};
 const rub=n=>isFinite(n)?(Math.round(n)||0).toLocaleString('ru-RU').replace('-','−')+' ₽':'—';
 // numbers in fields are shown as 165 000, typing still accepts 165000
 const fmt=n=>(Number(n)||0).toLocaleString('ru-RU',{maximumFractionDigits:2});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-let state, current=null, custom={}, resultSeen=false;
+let state, current=null, custom={};
 try{custom=JSON.parse(localStorage.getItem('tourcalc_custom')||'{}')||{}}catch(e){custom={}}
 const allPresets=()=>Object.assign({},BUILTIN,custom);
 const clone=o=>JSON.parse(JSON.stringify(o));
@@ -346,12 +319,16 @@ function renderMeals(){
     document.querySelectorAll(`[data-for="${k}N"]`).forEach(b=>b.disabled=!on);
   });
 }
+function renderDrivers(){
+  const on=state.drvMeals, t=$('drvMeals'); t.classList.toggle('off',!on); t.setAttribute('aria-pressed',on?'true':'false');
+  $('rowdrv').classList.toggle('dim',!on); $('drvHint').textContent=on?'платим, как за всех':'не платим';
+}
 function fill(){
   ensureOn(state); nightMem=[];
   SIMPLE.forEach(k=>{$(k).value=fmt(state[k])});
   $('nights').value=state.nightPrices.length;
   $('tripDate').value=state.date||''; $('tripNote').value=state.note||'';
-  renderNights(); renderList('per'); renderList('group'); renderMeals();
+  renderNights(); renderList('per'); renderList('group'); renderMeals(); renderDrivers();
 }
 // the one place where money is counted: result panel and city chips both use it
 function totals(s){
@@ -361,16 +338,18 @@ function totals(s){
   const meals=MEALS.reduce((a,k)=>a+mc(k)*num(s[k+'P']),0);
   const per=(s.per||[]).reduce((a,b)=>a+(b.on===false?0:num(b.val)),0);
   const group=(s.group||[]).reduce((a,b)=>a+(b.on===false?0:num(b.val)),0);
-  const perPerson=hotel+meals+per, driversCost=hotel*num(s.drivers);
+  // drivers: hotel always, meals only when the switch is on
+  const driversHotel=hotel*num(s.drivers), driversMeals=s.drvMeals?meals*num(s.drivers):0;
+  const perPerson=hotel+meals+per, driversCost=driversHotel+driversMeals;
   const total=perPerson*people+driversCost+group, price=num(s.price), revenue=price*payers;
-  return {payers, escorts, hotel, mealsN, meals, per, group, perPerson, driversCost, total, price, revenue, profit:revenue-total};
+  return {payers, escorts, hotel, mealsN, meals, per, group, perPerson, driversHotel, driversMeals, driversCost, total, price, revenue, profit:revenue-total};
 }
 const short=n=>(Math.abs(n)>=1000?(Math.round(n/1000)).toLocaleString('ru-RU')+' тыс':Math.round(n)+'').replace('-','−');
 function commit(){ if(current&&custom[current]){ custom[current]=clone(state); saveCustom(); updateChip(); } }
 function calc(){
-  const s=state, {payers, escorts, hotel, mealsN, meals, per, group, perPerson, driversCost, total, price, revenue, profit}=totals(s);
-  $('hotelSum').innerHTML=`${s.nightPrices.length} ноч. · <b>${rub(hotel)}</b> с человека`+(num(s.drivers)?` · водители <b>${rub(driversCost)}</b>`:'');
-  $('mealsSum').innerHTML=`${mealsN} приёмов пищи · <b>${rub(meals)}</b> с человека`;
+  const s=state, {payers, escorts, hotel, mealsN, meals, per, group, perPerson, driversHotel, driversMeals, driversCost, total, price, revenue, profit}=totals(s);
+  $('hotelSum').innerHTML=`${s.nightPrices.length} ноч. · <b>${rub(hotel)}</b> с человека`+(num(s.drivers)?` · водители <b>${rub(driversHotel)}</b>`:'');
+  $('mealsSum').innerHTML=`${mealsN} приёмов пищи · <b>${rub(meals)}</b> с человека`+(driversMeals?` · водители <b>${rub(driversMeals)}</b>`:'');
   $('perSum').innerHTML=`Итого <b>${rub(per)}</b> с человека`;
   $('groupSum').innerHTML=`Итого <b>${rub(group)}</b> на группу`;
   $('profit').textContent=rub(profit); $('profit').classList.toggle('neg',profit<0);
@@ -383,35 +362,30 @@ function calc(){
   const margin=price-perPerson;
   $('breakeven').textContent=margin>0?`от ${Math.max(1,Math.ceil((perPerson*escorts+driversCost+group)/margin))} оплачивающих`:'не выходит';
   $('needPrice').textContent=rub(Math.ceil(((total+num(s.goal))/payers)/100)*100);
-  renderMix({payers, escorts, hotel, meals, per, group, perPerson, driversCost, total, price, profit}); dockState();
+  renderMix({payers, escorts, hotel, meals, per, group, perPerson, driversCost, total, price, profit});
   try{localStorage.setItem('tourcalc_state3',JSON.stringify({state,current}))}catch(e){}
   scheduleCloud();
 }
 // where the price of one paying person goes; each part keeps its colour even when others are zero
 const SEGS=[['hotel','Проживание'],['meals','Питание'],['per','Билеты и прочее'],['escorts','Сопровождающие и водители'],['group','На всю группу'],['profit','Прибыль']];
-function dockState(){ $('dock').classList.toggle('away',resultSeen||typing()); }
 function renderMix(t){
   const costPer=t.payers>0?t.total/t.payers:NaN;
-  $('dockProfit').textContent=rub(t.profit); $('dockProfit').classList.toggle('neg',t.profit<0);
-  $('dockPrice').textContent=rub(t.price); $('dockCost').textContent=rub(costPer);
-  if(!(t.payers>0)){ $('mix').hidden=true; $('dockBar').innerHTML=''; return; }
+  if(!(t.payers>0)){ $('mix').hidden=true; return; }
   $('mix').hidden=false;
   const v={hotel:t.hotel, meals:t.meals, per:t.per, escorts:(t.perPerson*t.escorts+t.driversCost)/t.payers, group:t.group/t.payers, profit:Math.max(0,t.price-costPer)};
-  const loss=t.price<costPer, base=Math.max(t.price,costPer)||1;
+  const loss=t.price<costPer;
   const segs=SEGS.map(([k,label],i)=>({k,label,val:v[k],c:`var(--s${i+1})`})).filter(x=>x.val>=1);
-  const pct=x=>Math.round(x/base*100)+'%';
   let tick='';
   if(loss){ // the price ends inside the cost bar: mark that point
     let acc=0,k=0; for(const x of segs){ if(acc+x.val<=t.price){acc+=x.val;k++;} else break; }
     tick=`<span class="tick" style="left:calc((100% - ${(segs.length-1)*2}px) * ${t.price/costPer} + ${k*2}px)" title="Цена ${rub(t.price)}"></span>`;
   }
-  $('mixBar').innerHTML=segs.map(x=>`<i data-seg="${x.k}" style="--c:${x.c};flex:${x.val} 1 0" title="${x.label}: ${rub(x.val)} (${pct(x.val)})"></i>`).join('')+tick;
+  $('mixBar').innerHTML=segs.map(x=>`<i data-seg="${x.k}" style="--c:${x.c};flex:${x.val} 1 0" title="${x.label}: ${rub(x.val)}"></i>`).join('')+tick;
   $('mixBar').setAttribute('aria-label',segs.map(x=>`${x.label} ${rub(x.val)}`).join(', '));
-  $('dockBar').innerHTML=segs.map(x=>`<i style="--c:${x.c};flex:${x.val} 1 0"></i>`).join('');
   $('mixTitle').textContent=loss?'Себестоимость выше цены':'Из чего складывается цена';
   $('mixTotal').textContent=rub(loss?costPer:t.price);
-  $('mixLegend').innerHTML=segs.map(x=>`<li data-seg="${x.k}"${x.k==='profit'?' class="strong"':''}><span class="sw" style="--c:${x.c}"></span><span class="l">${x.label}</span><span class="v">${rub(x.val)}</span><span class="p">${pct(x.val)}</span></li>`).join('')
-    +(loss?`<li><span class="sw tk"></span><span class="l">Цена</span><span class="v">${rub(t.price)}</span><span class="p"></span></li><li class="loss"><span aria-hidden="true">⚠</span><span class="l">Убыток с человека</span><span class="v">${rub(t.price-costPer)}</span><span class="p"></span></li>`:'');
+  $('mixLegend').innerHTML=segs.map(x=>`<li data-seg="${x.k}"${x.k==='profit'?' class="strong"':''}><span class="sw" style="--c:${x.c}"></span><span class="l">${x.label}</span><span class="v">${rub(x.val)}</span></li>`).join('')
+    +(loss?`<li><span class="sw tk"></span><span class="l">Цена</span><span class="v">${rub(t.price)}</span></li><li class="loss"><span aria-hidden="true">⚠</span><span class="l">Убыток с человека</span><span class="v">${rub(t.price-costPer)}</span></li>`:'');
 }
 function chipLabel(name){const t=totals(custom[name]);return `${esc(name)}<span class="pp">${Math.round(t.price).toLocaleString('ru-RU')} ₽ · прибыль ${short(t.profit)}</span>`;}
 function updateChip(){const b=document.querySelector(`#presets .chip.on button`); if(b&&current) b.innerHTML=chipLabel(current);}
@@ -424,8 +398,6 @@ function renderPresets(){
     chip.appendChild(b); box.appendChild(chip);
   });
   box.appendChild(add);
-  const on=box.querySelector('.chip.on');
-  if(on&&box.scrollWidth>box.clientWidth){const b=box.getBoundingClientRect(),r=on.getBoundingClientRect(); if(r.left<b.left||r.right>b.right) box.scrollLeft+=r.left-b.left-16;}
   const has=current&&custom[current];
   $('cityStatus').innerHTML=has?`Открыт город <strong>${esc(current)}</strong> · изменения сохраняются сами`:(Object.keys(custom).length?'Черновик — выберите город или нажмите «+», чтобы сохранить эти цифры как новый город':'Черновик — нажмите «+», чтобы сохранить эти цифры как город');
   $('cityActions').hidden=!has; $('cityConfirm').hidden=true; $('cityRename').hidden=true;
@@ -460,6 +432,7 @@ $('f').addEventListener('click',e=>{
   }
   const it=e.target.closest('[data-itog]');
   if(it){ const o=state[it.dataset.itog][+it.dataset.i]; o.on=o.on===false; renderList(it.dataset.itog); calc(); commit(); return; }
+  if(e.target.closest('[data-dtog]')){ state.drvMeals=!state.drvMeals; renderDrivers(); calc(); commit(); return; }
   const tg=e.target.closest('[data-tog]');
   if(tg){ const k=tg.dataset.tog; state.on[k]=!state.on[k]; renderMeals(); calc(); commit(); return; }
   const d=e.target.closest('[data-del]'); if(!d) return;
@@ -502,7 +475,7 @@ document.addEventListener('focusin',e=>{
   setTimeout(sel,0); setTimeout(sel,80);
 });
 document.addEventListener('mouseup',e=>{if(e.target instanceof HTMLInputElement&&e.target===document.activeElement)e.preventDefault();});
-const CTRL='[data-step],[data-tog],[data-itog],[data-del]';
+const CTRL='[data-step],[data-tog],[data-dtog],[data-itog],[data-del]';
 const typing=()=>{const a=document.activeElement;return a instanceof HTMLInputElement||a instanceof HTMLTextAreaElement;};
 // mouse: keep focus in the field
 document.addEventListener('mousedown',e=>{ if(e.target.closest(CTRL)&&typing()) e.preventDefault(); });
@@ -567,12 +540,6 @@ document.addEventListener('focusout',e=>{const t=e.target; if(t instanceof HTMLI
 $('mix').addEventListener('pointerover',e=>{const m=$('mix'), el=e.target.closest('[data-seg]'); if(!el){m.classList.remove('hl');return;}
   m.classList.add('hl'); m.querySelectorAll('[data-seg]').forEach(x=>x.classList.toggle('on',x.dataset.seg===el.dataset.seg));});
 $('mix').addEventListener('pointerleave',()=>$('mix').classList.remove('hl'));
-// phone dock: hidden while the result panel is on screen or the keyboard is likely open
-const dock=$('dock');
-dock.addEventListener('click',()=>document.querySelector('.result').scrollIntoView({behavior:'smooth',block:'start'}));
-if('IntersectionObserver' in window) new IntersectionObserver(es=>{resultSeen=es[0].isIntersecting; dockState();},{rootMargin:'0px 0px -60px 0px'}).observe(document.querySelector('.result'));
-document.addEventListener('focusin',dockState);
-document.addEventListener('focusout',()=>setTimeout(dockState,0));
 // start
 let saved=null; try{saved=JSON.parse(localStorage.getItem('tourcalc_state3')||'null')}catch(e){}
 if(saved&&saved.state&&Array.isArray(saved.state.nightPrices)){state=ensureOn(saved.state);current=saved.current&&custom[saved.current]?saved.current:null; if(current) state=ensureOn(clone(custom[current]));}
